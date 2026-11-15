@@ -1,21 +1,11 @@
 // Single seam between the pages and blockchain/backend.
-// Uses blockchain contract when available; falls back to demo mode.
-import { STATUS, validateProjectInput } from "./projectModel";
+// When wallet is connected: calls real blockchain functions
+// When wallet disconnected: falls back to demo mode (localStorage)
+import { STATUS, validateProjectInput, computeBriefHash, roleFor, sameAddress } from "./projectModel.js";
 import * as blockchain from "../services/blockchain";
 
 const KEY = "proofwork.demo.projects";
 let memory = [];
-let useBlockchain = false;
-
-// Try to detect if blockchain is configured
-async function isBlockchainReady() {
-  try {
-    blockchain.getContractAddress();
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 function load() {
   try {
@@ -35,75 +25,110 @@ function save(list) {
 }
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const fail = (code, message) => Object.assign(new Error(message || code), { code });
+const publicView = ({ description, pages, features, ...rest }) => rest;
 
-export async function createProject(input) {
-  const fieldErrors = validateProjectInput(input);
-  if (Object.keys(fieldErrors).length) throw Object.assign(new Error("Invalid project"), { fieldErrors });
+function change(id, fn) {
+  const list = load();
+  const i = list.findIndex((p) => p.id === id);
+  if (i < 0) throw fail("NOT_FOUND", "Project not found.");
+  list[i] = fn(list[i]);
+  save(list);
+  return publicView(list[i]);
+}
 
-  const ready = await isBlockchainReady();
-  
-  if (ready && blockchain.isConnected()) {
-    // Use real blockchain
-    const developerAddress = input.developerAddress.trim();
-    const amountMON = parseFloat(input.amount);
-    const deadlineTs = Math.floor(new Date(input.deadline).getTime() / 1000);
-    const detailsHash = "0x" + Array(64).fill("0").join(""); // Placeholder hash
-    
-    // Convert MON to wei (18 decimals)
-    const amountWei = BigInt(Math.floor(amountMON * 1e18)).toString();
-    
-    const result = await blockchain.createProject(
-      developerAddress,
-      deadlineTs,
-      detailsHash,
-      amountWei
-    );
-
-    return {
-      id: result.projectId || "pending",
-      name: input.name.trim(),
-      description: input.description.trim(),
-      pages: input.pages,
-      features: input.features,
-      amount: input.amount.trim(),
-      developerAddress: developerAddress,
-      deadline: new Date(input.deadline).toISOString(),
-      status: STATUS.FUNDED,
-      onChain: true,
-      txHash: result.txHash,
-      createdAt: new Date().toISOString(),
-      extensions: [],
-    };
-  } else {
-    // Demo mode
-    await wait(700);
-    const project = {
-      id: crypto.randomUUID().slice(0, 8),
-      name: input.name.trim(),
-      description: input.description.trim(),
-      pages: input.pages,
-      features: input.features,
-      amount: String(input.amount).trim(),
-      developerAddress: input.developerAddress.trim(),
-      deadline: new Date(input.deadline).toISOString(),
-      status: STATUS.FUNDED,
-      escrowSimulated: true,
-      createdAt: new Date().toISOString(),
-      extensions: [],
-    };
-    save([project, ...load()]);
-    return project;
+// Check if blockchain is available and wallet is connected
+function isBlockchainReady() {
+  try {
+    const addr = blockchain.getConnectedAccount();
+    return !!addr;
+  } catch {
+    return false;
   }
 }
 
-export async function listProjects() {
-  return load();
+export async function createProject(input, clientAddress) {
+  if (!clientAddress) throw fail("NO_WALLET", "Connect a wallet to fund escrow.");
+  const fieldErrors = validateProjectInput(input, Date.now(), clientAddress);
+  if (Object.keys(fieldErrors).length) throw Object.assign(new Error("Invalid project"), { fieldErrors });
+  
+  const useChain = isBlockchainReady();
+  
+  if (useChain) {
+    // Blockchain mode: create real on-chain project
+    try {
+      const developerAddress = input.developerAddress.trim();
+      const amountMON = parseFloat(input.amount);
+      const deadlineTs = Math.floor(new Date(input.deadline).getTime() / 1000);
+      
+      // Create brief hash from project details
+      const brief = { description: input.description.trim(), pages: input.pages, features: input.features };
+      const detailsHash = await computeBriefHash(brief);
+      
+      // Convert MON to wei (18 decimals)
+      const amountWei = BigInt(Math.floor(amountMON * 1e18)).toString();
+      
+      const result = await blockchain.createProject(
+        developerAddress,
+        deadlineTs,
+        detailsHash,
+        amountWei
+      );
+
+      return {
+        id: result.projectId,
+        name: input.name.trim(),
+        description: input.description.trim(),
+        pages: input.pages,
+        features: input.features,
+        briefHash: detailsHash,
+        amount: String(amountMON),
+        clientAddress,
+        developerAddress,
+        deadline: new Date(input.deadline).toISOString(),
+        status: STATUS.FUNDED,
+        onChain: true,
+        txHash: result.txHash,
+        createdAt: new Date().toISOString(),
+        acceptedAt: null,
+        extensions: [],
+      };
+    } catch (err) {
+      console.error("Blockchain create failed, falling back to demo:", err);
+      // Fall through to demo mode
+    }
+  }
+  
+  // Demo mode: create in localStorage
+  await wait(700);
+  const brief = { description: input.description.trim(), pages: input.pages, features: input.features };
+  const project = {
+    id: crypto.randomUUID().slice(0, 8),
+    name: input.name.trim(),
+    ...brief,
+    briefHash: await computeBriefHash(brief),
+    amount: String(input.amount).trim(),
+    clientAddress,
+    developerAddress: input.developerAddress.trim(),
+    deadline: new Date(input.deadline).toISOString(),
+    status: STATUS.FUNDED,
+    escrowSimulated: true,
+    createdAt: new Date().toISOString(),
+    acceptedAt: null,
+    extensions: [],
+  };
+  save([project, ...load()]);
+  return publicView(project);
+}
+
+export async function listProjectsForAddress(address) {
+  return load().filter((p) => roleFor(p, address) !== "other").map(publicView);
 }
 
 export async function getProject(id) {
-  const ready = await isBlockchainReady();
+  const useChain = isBlockchainReady();
   
-  if (ready) {
+  if (useChain) {
     try {
       // Try to fetch from blockchain
       const onChainProject = await blockchain.getProject(parseInt(id));
@@ -121,11 +146,129 @@ export async function getProject(id) {
         createdAt: new Date(onChainProject.createdAt * 1000).toISOString(),
       };
     } catch (error) {
-      // Fall back to demo
       console.warn("Failed to fetch from blockchain, using demo:", error);
     }
   }
   
   // Demo mode or fallback
-  return load().find((p) => p.id === id) ?? null;
+  const p = load().find((x) => x.id === id);
+  return p ? publicView(p) : null;
+}
+
+export async function getBrief(id, address) {
+  const p = load().find((x) => x.id === id);
+  if (!p) throw fail("NOT_FOUND", "Project not found.");
+  if (roleFor(p, address) === "other") throw fail("FORBIDDEN", "This wallet is not part of the project.");
+  const brief = { description: p.description, pages: p.pages, features: p.features };
+  return { ...brief, hashMatches: (await computeBriefHash(brief)) === p.briefHash };
+}
+
+export async function approveProject(id, address) {
+  const useChain = isBlockchainReady();
+  
+  if (useChain) {
+    try {
+      await blockchain.approveProject(parseInt(id));
+      // Return updated project from blockchain
+      return getProject(id);
+    } catch (err) {
+      console.error("Blockchain approve failed, falling back to demo:", err);
+    }
+  }
+  
+  // Demo mode
+  await wait(600);
+  return change(id, (p) => {
+    if (!sameAddress(address, p.clientAddress)) throw fail("FORBIDDEN", "Only the client can approve this project.");
+    if (p.status !== STATUS.SUBMITTED) throw fail("BAD_STATE", "Project must be in submitted state to approve.");
+    return { ...p, status: STATUS.APPROVED };
+  });
+}
+
+export async function disputeProject(id, address) {
+  const useChain = isBlockchainReady();
+  
+  if (useChain) {
+    try {
+      await blockchain.disputeProject(parseInt(id));
+      return getProject(id);
+    } catch (err) {
+      console.error("Blockchain dispute failed, falling back to demo:", err);
+    }
+  }
+  
+  // Demo mode
+  await wait(600);
+  return change(id, (p) => {
+    if (!sameAddress(address, p.clientAddress)) throw fail("FORBIDDEN", "Only the client can dispute this project.");
+    if (p.status !== STATUS.SUBMITTED) throw fail("BAD_STATE", "Project must be submitted before dispute.");
+    return { ...p, status: STATUS.DISPUTED };
+  });
+}
+
+export async function submitWebsite(id, address, websiteURL) {
+  const useChain = isBlockchainReady();
+  
+  if (useChain) {
+    try {
+      await blockchain.submitWebsite(parseInt(id), websiteURL);
+      return getProject(id);
+    } catch (err) {
+      console.error("Blockchain submit failed, falling back to demo:", err);
+    }
+  }
+  
+  // Demo mode
+  await wait(600);
+  return change(id, (p) => {
+    if (!sameAddress(address, p.developerAddress)) throw fail("FORBIDDEN", "Only the developer can submit the website.");
+    if (p.status !== STATUS.FUNDED) throw fail("BAD_STATE", "Project must be funded to submit website.");
+    return { ...p, status: STATUS.SUBMITTED, websiteURL };
+  });
+}
+
+export async function requestExtension(id, address, requestedDeadline) {
+  const useChain = isBlockchainReady();
+  
+  if (useChain) {
+    try {
+      const deadlineTs = Math.floor(new Date(requestedDeadline).getTime() / 1000);
+      await blockchain.requestExtension(parseInt(id), deadlineTs);
+      return getProject(id);
+    } catch (err) {
+      console.error("Blockchain extension request failed, falling back to demo:", err);
+    }
+  }
+  
+  // Demo mode
+  await wait(600);
+  return change(id, (p) => {
+    if (!sameAddress(address, p.developerAddress)) throw fail("FORBIDDEN", "Only the developer can request extension.");
+    if (p.status !== STATUS.FUNDED) throw fail("BAD_STATE", "Only funded projects can request extension.");
+    return { ...p, extensionPending: true, extensionRequest: { requestedDeadline } };
+  });
+}
+
+export async function respondToExtension(id, address, approve) {
+  const useChain = isBlockchainReady();
+  
+  if (useChain) {
+    try {
+      await blockchain.respondToExtension(parseInt(id), approve);
+      return getProject(id);
+    } catch (err) {
+      console.error("Blockchain extension response failed, falling back to demo:", err);
+    }
+  }
+  
+  // Demo mode
+  await wait(600);
+  return change(id, (p) => {
+    if (!sameAddress(address, p.clientAddress)) throw fail("FORBIDDEN", "Only the client can respond to extension.");
+    if (!p.extensionPending) throw fail("BAD_STATE", "No pending extension request.");
+    if (approve) {
+      return { ...p, deadline: p.extensionRequest.requestedDeadline, extensionPending: false, extensionRequest: null };
+    }
+    return { ...p, extensionPending: false, extensionRequest: null };
+  });
 }

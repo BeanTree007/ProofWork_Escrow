@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import PageHeader from "../components/PageHeader";
 import TagInput from "../components/TagInput";
 import { createProject } from "../lib/gateway";
+import { DEMO_DEVELOPER, useWallet } from "../lib/wallet";
 import { REVIEW_WINDOW_DAYS } from "../lib/projectModel";
 
 const empty = { name: "", description: "", pages: [], features: [], amount: "", developerAddress: "", deadline: "" };
@@ -27,6 +28,7 @@ function toLocalInput(date) {
 }
 
 export default function CreateProject() {
+  const wallet = useWallet();
   const [form, setForm] = useState(empty);
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
@@ -47,12 +49,14 @@ export default function CreateProject() {
     setSubmitError("");
     setBusy(true);
     try {
-      setCreated(await createProject(form));
+      setCreated(await createProject(form, wallet.address));
       window.scrollTo(0, 0);
     } catch (err) {
       if (err.fieldErrors) {
         setErrors(err.fieldErrors);
         focusFirstError();
+      } else if (err.code === "NO_WALLET") {
+        setSubmitError(err.message);
       } else {
         setSubmitError("The project could not be created. Check your connection and try again.");
       }
@@ -121,13 +125,15 @@ export default function CreateProject() {
             </Field>
           </div>
 
-          <Field id="developerAddress" label="Developer wallet address" hint="Payment is released to this address on approval." error={err("developerAddress")}>
+          <Field id="developerAddress" label="Developer wallet address" hint="Payment is released to this address on approval. Only this wallet can open and accept the project." error={err("developerAddress")}>
             <input id="developerAddress" className="input mono" value={form.developerAddress} onChange={onText("developerAddress")} placeholder="0x..." spellCheck="false" autoComplete="off" aria-invalid={!!err("developerAddress") || undefined} aria-describedby={desc("developerAddress")} />
+            <button type="button" className="link-btn" onClick={() => set("developerAddress")(DEMO_DEVELOPER)}>Use the demo developer wallet</button>
           </Field>
 
+          {!wallet.address && <p className="hint-note">Connect a wallet (top right) to fund escrow. Your wallet becomes the client on the contract.</p>}
           {submitError && <p className="error" role="alert">{submitError}</p>}
           <div className="actions">
-            <button className="btn" type="submit" disabled={busy}>{busy ? "Funding escrow..." : "Create project and fund escrow"}</button>
+            <button className="btn" type="submit" disabled={busy || !wallet.address}>{busy ? "Funding escrow..." : "Create project and fund escrow"}</button>
           </div>
         </form>
 
