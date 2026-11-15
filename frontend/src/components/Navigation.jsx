@@ -1,4 +1,5 @@
 import { Link, NavLink } from "react-router-dom";
+import WalletButton from "./WalletButton";
 
 const links = [
   ["/", "Home"],
@@ -36,6 +37,7 @@ export default function Navigation() {
         <span className="mode-pill" title="Projects are stored in this browser until the contract is connected">
           Demo mode
         </span>
+        <WalletButton />
       </div>
     </header>
   );

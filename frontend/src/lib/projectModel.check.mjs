@@ -1,6 +1,6 @@
 // Run with: node src/lib/projectModel.check.mjs
 import assert from "node:assert/strict";
-import { validateProjectInput } from "./projectModel.js";
+import { validateProjectInput, computeBriefHash, roleFor } from "./projectModel.js";
 
 const now = Date.parse("2026-11-15T12:00:00Z");
 const good = {
@@ -18,4 +18,10 @@ assert.ok(validateProjectInput({ ...good, deadline: "2026-11-01T00:00:00Z" }, no
 assert.ok(validateProjectInput({ ...good, deadline: "" }, now).deadline);
 assert.ok(validateProjectInput({ ...good, pages: [] }, now).pages);
 assert.ok(validateProjectInput({ ...good, name: "ab" }, now).name);
+assert.ok(validateProjectInput(good, now, good.developerAddress.toUpperCase().replace("0X", "0x")).developerAddress, "developer must differ from client");
+const brief = { description: "A five page marketing site.", pages: ["Home"], features: ["Form"] };
+assert.equal(await computeBriefHash(brief), await computeBriefHash({ ...brief }));
+assert.notEqual(await computeBriefHash(brief), await computeBriefHash({ ...brief, pages: ["Home", "About"] }));
+assert.equal(roleFor({ clientAddress: "0xAA", developerAddress: "0xBB" }, "0xaa"), "client");
+assert.equal(roleFor({ clientAddress: "0xAA", developerAddress: "0xBB" }, "0xcc"), "other");
 console.log("projectModel checks passed");
