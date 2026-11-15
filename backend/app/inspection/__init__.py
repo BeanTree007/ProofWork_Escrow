@@ -1,1 +1,1 @@
-"""TODO: Implement evidence collection and report generation in pipeline.py."""
+"""Evidence collection and report generation. Entry point: pipeline.inspect_website."""
