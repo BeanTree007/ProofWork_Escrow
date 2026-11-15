@@ -4,7 +4,9 @@ __pycache__/
 .env
 .env.*
 !.env.example
+!contracts/.env.example
 node_modules/
 dist/
 contracts/out/
 contracts/cache/
+contracts/broadcast/

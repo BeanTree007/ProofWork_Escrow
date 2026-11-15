@@ -20,25 +20,27 @@ React UI -- wallet / transactions --> Monad escrow contract
                                 GPT-4o: evidence-based human-readable summary
 ```
 
-Only the health endpoint works today. Project routes, the inspection pipeline,
-wallet integration, contract implementation and persistence are all TODOs.
-The frontend does not call the project API or pretend transactions succeeded.
+The MVP escrow contract and Foundry tests are implemented, but the contract
+has not been deployed. Only the health endpoint works in the application;
+project routes, the inspection pipeline, wallet integration and persistence
+remain TODOs. The frontend does not call the project API or pretend
+transactions succeeded.
 
 ## Workflow and contract handoff
 
-The client supplies project name, description, required pages and features,
-developer wallet, amount and initial deadline. The intended creation
-transaction deposits funds atomically. The developer accepts, builds, and
-submits a URL by the deadline; the inspection system then gathers evidence.
-The client reviews the URL and report and approves or disputes.
+The client supplies project details, developer wallet, amount and initial
+deadline. Creation deposits funds atomically; the assigned developer may
+begin work immediately and submits a URL by the deadline. The inspection
+system then gathers evidence. The client reviews the URL and report and
+approves or disputes.
 
 The final MVP states, transitions, permissions, validations, events, accounting
 model, edge cases, and security considerations are in
 [smart-contract-architecture.md](./smart-contract-architecture.md). That
-document supersedes the earlier interface sketch as the design proposal; it is
-not an implementation or security audit. The current Solidity interface
-remains an outdated skeleton until both developers accept the design and
-derive a tested ABI from it.
+document records the approved design; it is not a security audit. The
+implemented contract and Foundry test suite live under `contracts/`. For
+testnet configuration, deployment and direct interaction, see the
+[Monad deployment guide](./monad-deployment.md).
 
 ## Developer A: application and inspection
 
@@ -63,9 +65,9 @@ derive a tested ABI from it.
 
 ## Developer B: escrow, Monad, and wallet
 
-- `contracts/`: implement and test the interface's behavior and security
-  invariants; add deployment scripts and testnet configuration only after
-  agreeing on the ABI, chain settings, token/native currency and review period.
+- `contracts/`: maintain the escrow implementation and tests, then deploy and
+  interact with Monad Testnet using the documented scripts. The MVP's disputed
+  funds remain locked indefinitely; use testnet funds only.
 - `frontend/src/services/`: implement wallet connection, network checking,
   transaction submission, event/state reads, and error handling. Coordinate
   page props and transaction lifecycle with A.
@@ -77,9 +79,9 @@ derive a tested ABI from it.
 
 `frontend/.env.example` contains local Vite proxy configuration.
 `backend/.env.example` lists future server-side configuration; Flask does not
-automatically load this example. The contract has a Foundry configuration but
-no network credentials or deployment configuration. Copy examples locally if
-needed and set environment variables explicitly. Do not commit populated env
+automatically load this example. Monad network settings and deployment
+environment variables are documented in
+[monad-deployment.md](./monad-deployment.md). Do not commit populated env
 files.
 
 The API route paths in this skeleton are provisional. Agree on project IDs,
