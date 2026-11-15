@@ -20,47 +20,27 @@ React UI -- wallet / transactions --> Monad escrow contract
                                 GPT-4o: evidence-based human-readable summary
 ```
 
-Only the health endpoint works today. Project routes, the inspection pipeline,
-wallet integration, contract implementation and persistence are all TODOs.
-The frontend does not call the project API or pretend transactions succeeded.
+The MVP escrow contract and Foundry tests are implemented, but the contract
+has not been deployed. Only the health endpoint works in the application;
+project routes, the inspection pipeline, wallet integration and persistence
+remain TODOs. The frontend does not call the project API or pretend
+transactions succeeded.
 
 ## Workflow and contract handoff
 
-The client supplies project name, description, required pages and features,
-developer wallet, amount and initial deadline. The intended creation
-transaction deposits funds atomically. The developer accepts, builds, and
-submits a URL by the deadline; the inspection system then gathers evidence.
-The client reviews the URL and report and approves or disputes.
+The client supplies project details, developer wallet, amount and initial
+deadline. Creation deposits funds atomically; the assigned developer may
+begin work immediately and submits a URL by the deadline. The inspection
+system then gathers evidence. The client reviews the URL and report and
+approves or disputes.
 
-The interface lists the requested states: `Created`, `Funded`, `InProgress`,
-`Submitted`, `Approved`, `Disputed`, `Expired`, and `Refunded`. Extension
-requests are separate pending data, not a replacement project state. The
-eventual implementation must define and test exact transition guards and
-event/data schemas with both developers; in particular:
-
-- Creation and funding must be atomic, without an externally observable
-  unfunded project presented as escrowed. Define how `Created` is represented
-  when the persisted project starts `Funded`.
-- Only the designated developer can accept, submit and request an extension;
-  only the client can approve or deny an extension, approve, dispute or claim
-  a missed-deadline refund. Approved extensions update the deadline; denied
-  requests do not. Specify the timing rules and prevent stale requests.
-- Before submission, a missed deadline with no approved extension permits the
-  client to reclaim funds. Define how `Expired` is recorded and how it moves
-  to `Refunded`, including boundary timestamps and acceptance edge cases.
-- Submission starts a finite review period. Approval pays the developer;
-  dispute locks funds in `Disputed` with no arbitration or unilateral payout.
-  After the review period, an eligible transaction must release funds to the
-  developer if no approval or dispute occurred. Blockchains do not run timers
-  themselves: someone must call the settlement function. Define and test exact
-  cutoff boundaries and the terminal state for this payout.
-- Use checks-effects-interactions, guard against reentrancy, test failed
-  transfers and prevent double payout. Review and test the contract before
-  any deployment or use of funds.
-
-The Solidity interface is a planning boundary, not a final ABI or a security
-specification. Decide the review duration, metadata storage, transition/event
-schema and contract deployment model jointly before implementing them.
+The final MVP states, transitions, permissions, validations, events, accounting
+model, edge cases, and security considerations are in
+[smart-contract-architecture.md](./smart-contract-architecture.md). That
+document records the approved design; it is not a security audit. The
+implemented contract and Foundry test suite live under `contracts/`. For
+testnet configuration, deployment and direct interaction, see the
+[Monad deployment guide](./monad-deployment.md).
 
 ## Developer A: application and inspection
 
@@ -85,9 +65,9 @@ schema and contract deployment model jointly before implementing them.
 
 ## Developer B: escrow, Monad, and wallet
 
-- `contracts/`: implement and test the interface's behavior and security
-  invariants; add deployment scripts and testnet configuration only after
-  agreeing on the ABI, chain settings, token/native currency and review period.
+- `contracts/`: maintain the escrow implementation and tests, then deploy and
+  interact with Monad Testnet using the documented scripts. The MVP's disputed
+  funds remain locked indefinitely; use testnet funds only.
 - `frontend/src/services/`: implement wallet connection, network checking,
   transaction submission, event/state reads, and error handling. Coordinate
   page props and transaction lifecycle with A.
@@ -99,9 +79,9 @@ schema and contract deployment model jointly before implementing them.
 
 `frontend/.env.example` contains local Vite proxy configuration.
 `backend/.env.example` lists future server-side configuration; Flask does not
-automatically load this example. The contract has a Foundry configuration but
-no network credentials or deployment configuration. Copy examples locally if
-needed and set environment variables explicitly. Do not commit populated env
+automatically load this example. Monad network settings and deployment
+environment variables are documented in
+[monad-deployment.md](./monad-deployment.md). Do not commit populated env
 files.
 
 The API route paths in this skeleton are provisional. Agree on project IDs,
