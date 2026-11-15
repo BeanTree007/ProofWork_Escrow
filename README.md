@@ -1,34 +1,91 @@
-# ProofWork
+# ProofWork - One Day Hackathon
 
-ProofWork is a proposed escrow workflow for freelance website development on
-Monad. A client locks funds, a developer submits a website, and the client
-reviews the site and an evidence report before approving or disputing the work.
+**Trustless escrow platform for freelance website development on Monad.**
 
-**The MVP escrow contract and Foundry tests are implemented, but the project
-has not been deployed.** The frontend and backend remain placeholders: there is
-no wallet connection, inspection pipeline, AI reporting, or persistence yet.
-The contract is a testnet MVP; disputed project funds remain locked
-indefinitely, so do not use it to hold real funds.
+A client locks funds → developer submits website → client reviews & approves → funds release.
 
-AI is an evidence-generation and reporting tool, not a judge or arbitrator.
-It cannot release funds or decide disputes. The contract will enforce the
-agreed workflow, including a finite client review period.
+**Status:** Smart contract deployed and tested. Frontend & backend skeletons ready. **12 hours to integration.**
 
-## Repository
+---
+
+## 🚀 Quick Start (Read These)
+
+**Start here. In order:**
+
+1. **[QUICK_REF.txt](QUICK_REF.txt)** (2 min) — One-page cheat sheet
+2. **[ONE_DAY_HACKATHON.md](ONE_DAY_HACKATHON.md)** (10 min) — Hour-by-hour plan  
+3. **[STARTER_CODE.md](STARTER_CODE.md)** (implement now) — Copy-paste code
+
+Then build. That's it.
+
+---
+
+## 📋 Reference (If Things Break)
+
+- **[docs/smart-contract-architecture.md](docs/smart-contract-architecture.md)** — Contract state machine
+- **[docs/monad-deployment.md](docs/monad-deployment.md)** — Deployment instructions
+- **[PROJECT_PLAN.md](PROJECT_PLAN.md)** — Original project goals
+
+## Repository Structure
 
 ```text
-frontend/src/components/  Shared UI and future wallet integration
-frontend/src/pages/       Workflow page placeholders
-frontend/src/services/    API and contract integration boundaries
-backend/app/routes/       Flask API endpoints
-backend/app/services/     Backend orchestration
-backend/app/inspection/   Evidence collection and reporting pipeline
-contracts/                Solidity escrow, Foundry tests, and deployment scripts
-docs/                     Architecture and integration decisions
+frontend/src/
+  ├── pages/              6 workflow pages (placeholders)
+  ├── components/        UI components
+  ├── services/
+  │   ├── blockchain/    ← Wallet & contract integration (TO BUILD)
+  │   └── api.js         ← Backend API client (TO BUILD)
+  └── lib/               Validation and demo helpers
+
+backend/app/
+  ├── routes/            15 API endpoints (placeholders → TO IMPLEMENT)
+  ├── services/          ← Service layer (TO BUILD)
+  │   ├── blockchain_service.py
+  │   ├── inspection_service.py
+  │   └── project_service.py
+  └── inspection/        ← Inspection pipeline (TO BUILD)
+      ├── playwright_stage.py
+      ├── beautifulsoup_stage.py
+      ├── lighthouse_stage.py
+      └── gpt_stage.py
+
+contracts/
+  ├── src/
+  │   └── ProofWorkEscrow.sol    ✅ Implemented & deployed
+  ├── test/                      ✅ 100+ tests passing
+  └── script/                    ✅ Deployment working
+
+docs/
+  ├── architecture.md            Architecture overview
+  ├── smart-contract-architecture.md  State machine & design
+  └── monad-deployment.md        Deployment instructions
 ```
 
-See [architecture](docs/architecture.md) for workflow, responsibilities,
-security constraints, and the developer handoff.
+## What's Done ✅
+
+- Smart contract: Fully implemented, tested, deployed
+- Frontend skeleton: 6 pages, routing, validation
+- Backend skeleton: Flask app, all route paths defined
+
+## What's Missing 🔲
+
+- Frontend: Wallet connection
+- Frontend: Contract integration
+- Backend: Contract reads & writes
+- Backend: Database persistence
+- Backend: Inspection pipeline
+- Backend: Authentication
+
+See [INTEGRATION_AUDIT.md](INTEGRATION_AUDIT.md) for complete assessment.
+
+## Developer Handoff
+
+| Developer | Owns |
+|-----------|------|
+| **A** | React frontend, Flask backend, inspection pipeline, AI reporting |
+| **B** | Smart contract, Monad integration, wallet connectivity |
+
+Coordinate on wallet UI boundaries and API contracts.
 
 ## Run locally
 

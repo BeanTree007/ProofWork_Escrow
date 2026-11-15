@@ -1,0 +1,142 @@
+================================================================================
+                      ONE DAY HACKATHON - QUICK REF
+================================================================================
+
+Contract is deployed. Smart contract works. You're wiring it to UI.
+
+TIME: 12 hours
+GOAL: User connects wallet, creates project on-chain, submits website, approves
+RESULT: Judges see contract state change on Monad testnet
+
+================================================================================
+WHAT YOU NEED TO DO:
+================================================================================
+
+TASK 1: Get contract address & ABI (5 min)
+- Run: forge inspect ProofWorkEscrow abi > ../frontend/src/contract-abi.json
+- Note your contract address from deployment
+- Note Monad RPC: https://testnet.monad.xyz/rpc
+
+TASK 2: Install ethers.js (5 min)
+- cd frontend
+- npm install ethers@6
+
+TASK 3: Copy starter code (30 min)
+- See STARTER_CODE.md
+- Create: frontend/src/services/wallet.js
+- Create: frontend/src/services/contract.js
+- Update 4 pages: Landing, CreateProject, Dashboard, SubmitWebsite
+- Fill in CONTRACT_ADDRESS in contract.js
+
+TASK 4: Test each step (30 min)
+- Wallet connects → address shows
+- Create project → transaction works
+- Dashboard loads → shows project state
+- Submit website → state changes
+- Approve project → state changes again
+
+TASK 5: Practice demo (15 min)
+- Wallet → Create → View → Submit → Approve
+- Takes 3-4 minutes
+- All transactions succeed
+- State visibly changes each time
+
+TASK 6: Deploy to judge (5 min)
+- Make sure frontend is running
+- Make sure you have testnet MON
+- Run the demo
+- Done
+
+================================================================================
+CODE TO BUILD (COPY FROM STARTER_CODE.md):
+================================================================================
+
+frontend/src/services/wallet.js
+frontend/src/services/contract.js
+frontend/src/pages/Landing.jsx (add connect button)
+frontend/src/pages/CreateProject.jsx (add form)
+frontend/src/pages/Dashboard.jsx (show project, load state)
+frontend/src/pages/SubmitWebsite.jsx (add form)
+
+That's ~500 lines of code total. Copy-paste from STARTER_CODE.md. Fill blanks.
+
+================================================================================
+TESTING CHECKLIST:
+================================================================================
+
+[ ] MetaMask installed
+[ ] Monad testnet network added to MetaMask
+[ ] Have testnet MON in wallet (or can get from faucet)
+[ ] Frontend runs (npm run dev)
+[ ] Backend runs (optional; just for health check)
+[ ] Wallet connects and shows address
+[ ] Create project: form works, transaction succeeds
+[ ] Dashboard: loads project, shows state
+[ ] Submit website: form works, transaction succeeds, state changes
+[ ] Approve: button works, transaction succeeds, state changes
+[ ] Full flow runs without errors
+[ ] Demo is 3-4 minutes long
+
+================================================================================
+COMMON GOTCHAS:
+================================================================================
+
+❌ Contract address not filled in → Fill it
+❌ Wrong network → Switch MetaMask to Monad testnet
+❌ Not enough MON → Get from faucet or ask organizer
+❌ ethers.js not installed → npm install ethers@6
+❌ Transaction reverts → Check contract address, check parameters
+❌ Page shows undefined → Check browser console, check imports
+❌ Can't connect wallet → Install MetaMask, or check if it's allowed
+
+================================================================================
+THINGS YOU DON'T NEED TO BUILD:
+================================================================================
+
+❌ Database
+❌ User authentication
+❌ Real website inspection
+❌ Beautiful UI
+❌ Error handling
+❌ Logging
+❌ Tests
+❌ Comments
+❌ Fancy styling
+
+Just make it work.
+
+================================================================================
+WHAT SUCCESS LOOKS LIKE:
+================================================================================
+
+User:
+  1. Clicks "Connect Wallet"
+  2. Signs MetaMask popup
+  3. Fills form to create project
+  4. Signs transaction
+  5. Sees "Funded" state on dashboard
+  6. Enters website URL
+  7. Signs transaction
+  8. Sees "Submitted" state on dashboard
+  9. Clicks "Approve"
+  10. Signs transaction
+  11. Sees "Approved" state on dashboard
+
+All on-chain. All on Monad testnet. All working. Done.
+
+================================================================================
+NEED MORE DETAIL?
+================================================================================
+
+Read these files in order:
+1. ONE_DAY_HACKATHON.md (hour-by-hour plan)
+2. STARTER_CODE.md (copy-paste code)
+3. INTEGRATION_AUDIT.md (if things break)
+
+That's it. Stop reading. Start coding.
+
+================================================================================
+GO.
+================================================================================
+
+Timer starts now. 12 hours. Ship it.

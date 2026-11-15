@@ -1,0 +1,360 @@
+[
+  {
+    "type": "constructor",
+    "inputs": [{"name": "reviewPeriod_", "type": "uint256", "internalType": "uint256"}],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "MAX_WEBSITE_URL_LENGTH",
+    "inputs": [],
+    "outputs": [{"name": "", "type": "uint256", "internalType": "uint256"}],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "approveProject",
+    "inputs": [{"name": "projectId", "type": "uint256", "internalType": "uint256"}],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "claimable",
+    "inputs": [{"name": "account", "type": "address", "internalType": "address"}],
+    "outputs": [{"name": "amount", "type": "uint256", "internalType": "uint256"}],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "createProject",
+    "inputs": [
+      {"name": "developer", "type": "address", "internalType": "address"},
+      {"name": "deadline", "type": "uint256", "internalType": "uint256"},
+      {"name": "detailsHash", "type": "bytes32", "internalType": "bytes32"}
+    ],
+    "outputs": [{"name": "projectId", "type": "uint256", "internalType": "uint256"}],
+    "stateMutability": "payable"
+  },
+  {
+    "type": "function",
+    "name": "disputeProject",
+    "inputs": [{"name": "projectId", "type": "uint256", "internalType": "uint256"}],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "getProject",
+    "inputs": [{"name": "projectId", "type": "uint256", "internalType": "uint256"}],
+    "outputs": [
+      {
+        "name": "",
+        "type": "tuple",
+        "internalType": "struct ProofWorkEscrow.Project",
+        "components": [
+          {"name": "client", "type": "address", "internalType": "address"},
+          {"name": "developer", "type": "address", "internalType": "address"},
+          {"name": "escrowAmount", "type": "uint256", "internalType": "uint256"},
+          {"name": "state", "type": "uint8", "internalType": "enum ProofWorkEscrow.ProjectState"},
+          {"name": "createdAt", "type": "uint256", "internalType": "uint256"},
+          {"name": "deadline", "type": "uint256", "internalType": "uint256"},
+          {"name": "detailsHash", "type": "bytes32", "internalType": "bytes32"},
+          {"name": "submittedAt", "type": "uint256", "internalType": "uint256"},
+          {"name": "reviewDeadline", "type": "uint256", "internalType": "uint256"},
+          {"name": "websiteURL", "type": "string", "internalType": "string"},
+          {"name": "requestedDeadline", "type": "uint256", "internalType": "uint256"}
+        ]
+      }
+    ],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "projectCount",
+    "inputs": [],
+    "outputs": [{"name": "", "type": "uint256", "internalType": "uint256"}],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "refundAfterDeadline",
+    "inputs": [{"name": "projectId", "type": "uint256", "internalType": "uint256"}],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "releaseAfterReview",
+    "inputs": [{"name": "projectId", "type": "uint256", "internalType": "uint256"}],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "requestExtension",
+    "inputs": [
+      {"name": "projectId", "type": "uint256", "internalType": "uint256"},
+      {"name": "requestedDeadline", "type": "uint256", "internalType": "uint256"}
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "respondToExtension",
+    "inputs": [
+      {"name": "projectId", "type": "uint256", "internalType": "uint256"},
+      {"name": "approve", "type": "bool", "internalType": "bool"}
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "reviewPeriod",
+    "inputs": [],
+    "outputs": [{"name": "", "type": "uint256", "internalType": "uint256"}],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "submitWebsite",
+    "inputs": [
+      {"name": "projectId", "type": "uint256", "internalType": "uint256"},
+      {"name": "websiteURL", "type": "string", "internalType": "string"}
+    ],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "function",
+    "name": "totalClaimable",
+    "inputs": [],
+    "outputs": [{"name": "", "type": "uint256", "internalType": "uint256"}],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "totalEscrowed",
+    "inputs": [],
+    "outputs": [{"name": "", "type": "uint256", "internalType": "uint256"}],
+    "stateMutability": "view"
+  },
+  {
+    "type": "function",
+    "name": "withdrawTo",
+    "inputs": [{"name": "recipient", "type": "address", "internalType": "address"}],
+    "outputs": [],
+    "stateMutability": "nonpayable"
+  },
+  {
+    "type": "event",
+    "name": "DeadlineRefunded",
+    "inputs": [
+      {"name": "projectId", "type": "uint256", "indexed": true, "internalType": "uint256"},
+      {"name": "client", "type": "address", "indexed": true, "internalType": "address"},
+      {"name": "amount", "type": "uint256", "indexed": false, "internalType": "uint256"},
+      {"name": "deadline", "type": "uint256", "indexed": false, "internalType": "uint256"}
+    ]
+  },
+  {
+    "type": "event",
+    "name": "ExtensionRequested",
+    "inputs": [
+      {"name": "projectId", "type": "uint256", "indexed": true, "internalType": "uint256"},
+      {"name": "developer", "type": "address", "indexed": true, "internalType": "address"},
+      {"name": "currentDeadline", "type": "uint256", "indexed": false, "internalType": "uint256"},
+      {"name": "requestedDeadline", "type": "uint256", "indexed": false, "internalType": "uint256"}
+    ]
+  },
+  {
+    "type": "event",
+    "name": "ExtensionResponded",
+    "inputs": [
+      {"name": "projectId", "type": "uint256", "indexed": true, "internalType": "uint256"},
+      {"name": "client", "type": "address", "indexed": true, "internalType": "address"},
+      {"name": "approved", "type": "bool", "indexed": false, "internalType": "bool"},
+      {"name": "resultingDeadline", "type": "uint256", "indexed": false, "internalType": "uint256"}
+    ]
+  },
+  {
+    "type": "event",
+    "name": "ProjectApproved",
+    "inputs": [
+      {"name": "projectId", "type": "uint256", "indexed": true, "internalType": "uint256"},
+      {"name": "client", "type": "address", "indexed": true, "internalType": "address"},
+      {"name": "developer", "type": "address", "indexed": true, "internalType": "address"},
+      {"name": "amount", "type": "uint256", "indexed": false, "internalType": "uint256"}
+    ]
+  },
+  {
+    "type": "event",
+    "name": "ProjectCreated",
+    "inputs": [
+      {"name": "projectId", "type": "uint256", "indexed": true, "internalType": "uint256"},
+      {"name": "client", "type": "address", "indexed": true, "internalType": "address"},
+      {"name": "developer", "type": "address", "indexed": true, "internalType": "address"},
+      {"name": "amount", "type": "uint256", "indexed": false, "internalType": "uint256"},
+      {"name": "deadline", "type": "uint256", "indexed": false, "internalType": "uint256"},
+      {"name": "detailsHash", "type": "bytes32", "indexed": false, "internalType": "bytes32"}
+    ]
+  },
+  {
+    "type": "event",
+    "name": "ProjectDisputed",
+    "inputs": [
+      {"name": "projectId", "type": "uint256", "indexed": true, "internalType": "uint256"},
+      {"name": "client", "type": "address", "indexed": true, "internalType": "address"},
+      {"name": "amountLocked", "type": "uint256", "indexed": false, "internalType": "uint256"}
+    ]
+  },
+  {
+    "type": "event",
+    "name": "ReviewTimedOut",
+    "inputs": [
+      {"name": "projectId", "type": "uint256", "indexed": true, "internalType": "uint256"},
+      {"name": "developer", "type": "address", "indexed": true, "internalType": "address"},
+      {"name": "amount", "type": "uint256", "indexed": false, "internalType": "uint256"},
+      {"name": "reviewDeadline", "type": "uint256", "indexed": false, "internalType": "uint256"}
+    ]
+  },
+  {
+    "type": "event",
+    "name": "WebsiteSubmitted",
+    "inputs": [
+      {"name": "projectId", "type": "uint256", "indexed": true, "internalType": "uint256"},
+      {"name": "developer", "type": "address", "indexed": true, "internalType": "address"},
+      {"name": "websiteURL", "type": "string", "indexed": false, "internalType": "string"},
+      {"name": "submittedAt", "type": "uint256", "indexed": false, "internalType": "uint256"},
+      {"name": "reviewDeadline", "type": "uint256", "indexed": false, "internalType": "uint256"}
+    ]
+  },
+  {
+    "type": "event",
+    "name": "Withdrawal",
+    "inputs": [
+      {"name": "account", "type": "address", "indexed": true, "internalType": "address"},
+      {"name": "recipient", "type": "address", "indexed": true, "internalType": "address"},
+      {"name": "amount", "type": "uint256", "indexed": false, "internalType": "uint256"}
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ActionWindowClosed",
+    "inputs": [{"name": "cutoff", "type": "uint256", "internalType": "uint256"}]
+  },
+  {
+    "type": "error",
+    "name": "DeadlineNotReached",
+    "inputs": [{"name": "deadline", "type": "uint256", "internalType": "uint256"}]
+  },
+  {
+    "type": "error",
+    "name": "DeveloperCannotBeClient",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "EmptyWebsiteURL",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ExtensionAlreadyPending",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidDeadline",
+    "inputs": [{"name": "deadline", "type": "uint256", "internalType": "uint256"}]
+  },
+  {
+    "type": "error",
+    "name": "InvalidDetailsHash",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidDeveloper",
+    "inputs": [{"name": "developer", "type": "address", "internalType": "address"}]
+  },
+  {
+    "type": "error",
+    "name": "InvalidEscrowAmount",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidRequestedDeadline",
+    "inputs": [
+      {"name": "requestedDeadline", "type": "uint256", "internalType": "uint256"},
+      {"name": "currentDeadline", "type": "uint256", "internalType": "uint256"}
+    ]
+  },
+  {
+    "type": "error",
+    "name": "InvalidReviewPeriod",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "InvalidState",
+    "inputs": [
+      {"name": "projectId", "type": "uint256", "internalType": "uint256"},
+      {"name": "expected", "type": "uint8", "internalType": "enum ProofWorkEscrow.ProjectState"},
+      {"name": "actual", "type": "uint8", "internalType": "enum ProofWorkEscrow.ProjectState"}
+    ]
+  },
+  {
+    "type": "error",
+    "name": "InvalidStateForAction",
+    "inputs": [{"name": "currentState", "type": "uint8", "internalType": "enum ProofWorkEscrow.ProjectState"}]
+  },
+  {
+    "type": "error",
+    "name": "NoClaimableBalance",
+    "inputs": [{"name": "account", "type": "address", "internalType": "address"}]
+  },
+  {
+    "type": "error",
+    "name": "NoPendingExtension",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "ProjectNotFound",
+    "inputs": [{"name": "projectId", "type": "uint256", "internalType": "uint256"}]
+  },
+  {
+    "type": "error",
+    "name": "ReentrantCall",
+    "inputs": []
+  },
+  {
+    "type": "error",
+    "name": "Unauthorized",
+    "inputs": [{"name": "caller", "type": "address", "internalType": "address"}]
+  },
+  {
+    "type": "error",
+    "name": "WebsiteURLTooLong",
+    "inputs": [
+      {"name": "suppliedLength", "type": "uint256", "internalType": "uint256"},
+      {"name": "maximumLength", "type": "uint256", "internalType": "uint256"}
+    ]
+  },
+  {
+    "type": "error",
+    "name": "WithdrawalFailed",
+    "inputs": [
+      {"name": "recipient", "type": "address", "internalType": "address"},
+      {"name": "amount", "type": "uint256", "internalType": "uint256"}
+    ]
+  },
+  {
+    "type": "error",
+    "name": "ZeroAddressRecipient",
+    "inputs": []
+  }
+]
