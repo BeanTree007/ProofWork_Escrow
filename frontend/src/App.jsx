@@ -1,5 +1,6 @@
 import { Route, Routes } from "react-router-dom";
 import Navigation from "./components/Navigation";
+import Footer from "./components/Footer";
 import Landing from "./pages/Landing";
 import CreateProject from "./pages/CreateProject";
 import Dashboard from "./pages/Dashboard";
@@ -13,7 +14,6 @@ export default function App() {
     <>
       <Navigation />
       <main>
-        <p className="notice">Development skeleton: escrow and inspection are not implemented.</p>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/create" element={<CreateProject />} />
@@ -24,6 +24,7 @@ export default function App() {
           <Route path="*" element={<NotFound />} />
         </Routes>
       </main>
+      <Footer />
     </>
   );
 }
