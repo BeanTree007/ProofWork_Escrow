@@ -102,7 +102,7 @@ export function getConnectedAccount() {
 }
 
 // Listen for account changes
-if (window.ethereum) {
+if (typeof window !== 'undefined' && window.ethereum) {
   window.ethereum.on('accountsChanged', (accounts) => {
     if (accounts.length === 0) {
       currentAccount = null;

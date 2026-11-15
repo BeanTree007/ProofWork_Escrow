@@ -79,7 +79,8 @@ export default function CreateProject() {
           </dl>
           <p className="hint-note">Demo mode: no real transaction was sent. Funding is simulated until the Monad contract is connected.</p>
           <div className="actions">
-            <Link className="btn" to="/dashboard">Go to dashboard</Link>
+            <Link className="btn" to={`/projects/${encodeURIComponent(created.id)}`}>Open project</Link>
+            <Link className="btn btn-secondary" to="/dashboard">Go to dashboard</Link>
             <button className="btn btn-secondary" type="button" onClick={() => { setCreated(null); setForm(empty); }}>
               Create another project
             </button>
