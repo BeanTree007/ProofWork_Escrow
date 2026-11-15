@@ -39,6 +39,34 @@ The AI never decides whether payment should be released.
 
 The AI acts only as an inspector that produces evidence.
 
+Website URL
+       ↓
+   Playwright
+       ↓
+Screenshots
+Navigation
+Responsive Testing
+       ↓
+
+BeautifulSoup
+       ↓
+HTML Analysis
+Requirement Matching
+Form Detection
+Metadata Extraction
+       ↓
+
+Lighthouse
+       ↓
+Performance
+SEO
+Accessibility
+       ↓
+
+GPT-4o
+       ↓
+Professional Verification Report
+
 The client reviews:
 1. The submitted website
 2. The AI verification report
@@ -138,7 +166,7 @@ AI Verification Report
 - Website Reachability
 - Required Page Detection
 - Contact Form Detection
-- Screenshot Capture
+- Screenshot Captures
 - Mobile Responsiveness
 - Lighthouse-style Metrics
 - Requirement Checklist
