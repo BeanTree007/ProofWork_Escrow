@@ -2,14 +2,14 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import PageHeader from "../components/PageHeader";
 import WalletButton from "../components/WalletButton";
-import { buildSignInMessage, useWallet } from "../lib/wallet";
 import { acceptProject, cancelProject, getBrief, getProject } from "../lib/gateway";
 import { STATUS, roleFor, shortAddress, statusTone } from "../lib/projectModel";
+import { useBlockchainWallet } from "../services/blockchain/useBlockchainWallet";
 
 export default function Project() {
   const { id } = useParams();
-  const wallet = useWallet();
-  const { address } = wallet;
+  const blockchainWallet = useBlockchainWallet();
+  const address = blockchainWallet.address;
   const [project, setProject] = useState(undefined); // undefined = loading, null = not found
   const [brief, setBrief] = useState(null);
   const [agreed, setAgreed] = useState(false);
@@ -24,17 +24,16 @@ export default function Project() {
   }, [id]);
 
   const role = project && address ? roleFor(project, address) : null;
-  const signed = !!address && wallet.hasSigned(id);
   const canRead = role === "client" || role === "developer";
   const loaded = !!project;
 
   useEffect(() => {
     setBrief(null);
-    if (!loaded || !canRead || !signed) return;
+    if (!loaded || !canRead) return;
     let live = true;
     getBrief(id, address).then((b) => live && setBrief(b)).catch((e) => live && setError(e.message));
     return () => { live = false; };
-  }, [id, address, canRead, signed, loaded]);
+  }, [id, address, canRead, loaded]);
 
   async function run(action) {
     setBusy(true);
@@ -50,9 +49,8 @@ export default function Project() {
   }
 
   async function sign() {
-    setBusy(true);
-    setError("");
-    try { await wallet.signToView(id); } catch (e) { setError(e.message); } finally { setBusy(false); }
+    // Signing is handled transparently by blockchain wallet
+    // No-op for blockchain integration
   }
 
   if (project === undefined) return <p>Loading project...</p>;
@@ -85,7 +83,7 @@ export default function Project() {
 
       {error && <p className="error" role="alert">{error}</p>}
 
-      {!address && (
+      {canRead && !address && (
         <div className="card stack">
           <h2>Connect your wallet to view the brief</h2>
           <p>The requirements are visible only to the client and the developer wallet for this project.</p>
@@ -101,15 +99,10 @@ export default function Project() {
         </div>
       )}
 
-      {canRead && !signed && (
+      {canRead && !brief && (
         <div className="card stack">
-          <h2>Sign to view the brief</h2>
-          <p>Prove you control this wallet with a free signature. It sends no transaction and costs no gas.</p>
-          <details>
-            <summary>Message you will sign</summary>
-            <pre className="sign-message">{buildSignInMessage(id)}</pre>
-          </details>
-          <div className="actions"><button className="btn" type="button" onClick={sign} disabled={busy}>{busy ? "Waiting for signature..." : "Sign and view brief"}</button></div>
+          <h2>Loading project brief...</h2>
+          <p>Getting requirements for this project.</p>
         </div>
       )}
 

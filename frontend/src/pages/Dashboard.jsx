@@ -3,10 +3,10 @@ import { Link } from "react-router-dom";
 import PageHeader from "../components/PageHeader";
 import { listProjectsForAddress } from "../lib/gateway";
 import { roleFor, statusTone } from "../lib/projectModel";
-import { useWallet } from "../lib/wallet";
+import { useBlockchainWallet } from "../services/blockchain/useBlockchainWallet";
 
 export default function Dashboard() {
-  const { address } = useWallet();
+  const { address } = useBlockchainWallet();
   const [items, setItems] = useState(null);
 
   useEffect(() => {

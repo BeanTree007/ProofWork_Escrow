@@ -66,6 +66,11 @@ export async function createProject(developer, deadline, detailsHash, escrowAmou
     throw new Error('Invalid developer address');
   }
   
+  // Validate detailsHash is non-zero
+  if (!detailsHash || detailsHash === '0x' || detailsHash === '0x0000000000000000000000000000000000000000000000000000000000000000') {
+    throw new Error('Project details hash is required and cannot be empty');
+  }
+  
   const deadlineNum = BigInt(Math.floor(deadline));
   const amountBN = BigInt(escrowAmount);
   
@@ -73,7 +78,7 @@ export async function createProject(developer, deadline, detailsHash, escrowAmou
   const tx = await contract.createProject(
     developer,
     deadlineNum,
-    detailsHash || '0x0000000000000000000000000000000000000000000000000000000000000000',
+    detailsHash,
     { value: amountBN }
   );
 
