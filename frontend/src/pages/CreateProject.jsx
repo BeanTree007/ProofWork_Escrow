@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import PageHeader from "../components/PageHeader";
 import TagInput from "../components/TagInput";
 import { createProject } from "../lib/gateway";
+import { DEMO_DEVELOPER, useWallet } from "../lib/wallet";
 import { REVIEW_WINDOW_DAYS } from "../lib/projectModel";
 
 const empty = { name: "", description: "", pages: [], features: [], amount: "", developerAddress: "", deadline: "" };
@@ -21,12 +22,30 @@ function Field({ id, label, hint, error, children }) {
   );
 }
 
+function CopyLink({ url }) {
+  const [copied, setCopied] = useState(false);
+  async function copy() {
+    try { await navigator.clipboard.writeText(url); setCopied(true); } catch { setCopied(false); }
+  }
+  return (
+    <div className="field">
+      <label htmlFor="share-link">Project link for the developer</label>
+      <div className="copy-row">
+        <input id="share-link" className="input mono" readOnly value={url} onFocus={(e) => e.target.select()} />
+        <button type="button" className="btn btn-secondary" onClick={copy}>{copied ? "Copied" : "Copy link"}</button>
+      </div>
+      <span className="hint">The developer must connect the wallet address you entered to see and accept the brief.</span>
+    </div>
+  );
+}
+
 function toLocalInput(date) {
   const pad = (n) => String(n).padStart(2, "0");
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
 export default function CreateProject() {
+  const wallet = useWallet();
   const [form, setForm] = useState(empty);
   const [errors, setErrors] = useState({});
   const [busy, setBusy] = useState(false);
@@ -47,12 +66,14 @@ export default function CreateProject() {
     setSubmitError("");
     setBusy(true);
     try {
-      setCreated(await createProject(form));
+      setCreated(await createProject(form, wallet.address));
       window.scrollTo(0, 0);
     } catch (err) {
       if (err.fieldErrors) {
         setErrors(err.fieldErrors);
         focusFirstError();
+      } else if (err.code === "NO_WALLET") {
+        setSubmitError(err.message);
       } else {
         setSubmitError("The project could not be created. Check your connection and try again.");
       }
@@ -64,7 +85,7 @@ export default function CreateProject() {
   if (created) {
     return (
       <section>
-        <PageHeader title="Escrow funded" lede={`${created.name} is open for the developer to start.`} />
+        <PageHeader title="Escrow funded" lede={`${created.name} is funded and waiting for the developer to accept.`} />
         <div className="card stack">
           <span className="badge badge-ok">{created.status}</span>
           <dl className="summary">
@@ -73,9 +94,10 @@ export default function CreateProject() {
             <dt>Developer</dt><dd className="mono wrap">{created.developerAddress}</dd>
             <dt>Deadline</dt><dd>{new Date(created.deadline).toLocaleString()}</dd>
           </dl>
+          <CopyLink url={`${window.location.origin}/projects/${created.id}`} />
           <p className="hint-note">Demo mode: no real transaction was sent. Funding is simulated until the Monad contract is connected.</p>
           <div className="actions">
-            <Link className="btn" to="/dashboard">Go to dashboard</Link>
+            <Link className="btn" to={`/projects/${created.id}`}>Open project</Link>
             <button className="btn btn-secondary" type="button" onClick={() => { setCreated(null); setForm(empty); }}>
               Create another project
             </button>
@@ -121,13 +143,15 @@ export default function CreateProject() {
             </Field>
           </div>
 
-          <Field id="developerAddress" label="Developer wallet address" hint="Payment is released to this address on approval." error={err("developerAddress")}>
+          <Field id="developerAddress" label="Developer wallet address" hint="Payment is released to this address on approval. Only this wallet can open and accept the project." error={err("developerAddress")}>
             <input id="developerAddress" className="input mono" value={form.developerAddress} onChange={onText("developerAddress")} placeholder="0x..." spellCheck="false" autoComplete="off" aria-invalid={!!err("developerAddress") || undefined} aria-describedby={desc("developerAddress")} />
+            <button type="button" className="link-btn" onClick={() => set("developerAddress")(DEMO_DEVELOPER)}>Use the demo developer wallet</button>
           </Field>
 
+          {!wallet.address && <p className="hint-note">Connect a wallet (top right) to fund escrow. Your wallet becomes the client on the contract.</p>}
           {submitError && <p className="error" role="alert">{submitError}</p>}
           <div className="actions">
-            <button className="btn" type="submit" disabled={busy}>{busy ? "Funding escrow..." : "Create project and fund escrow"}</button>
+            <button className="btn" type="submit" disabled={busy || !wallet.address}>{busy ? "Funding escrow..." : "Create project and fund escrow"}</button>
           </div>
         </form>
 
