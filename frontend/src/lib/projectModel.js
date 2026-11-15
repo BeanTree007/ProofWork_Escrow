@@ -14,8 +14,40 @@ export const STATUS = {
 export const REVIEW_WINDOW_DAYS = 7;
 const ADDRESS = /^0x[a-fA-F0-9]{40}$/;
 
+export function shortAddress(addr) {
+  if (!addr || typeof addr !== 'string') return addr;
+  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+}
+
+export function sameAddress(a, b) {
+  if (!a || !b) return false;
+  return a.toLowerCase() === b.toLowerCase();
+}
+
+export function roleFor(project, address) {
+  if (!address) return "other";
+  if (sameAddress(address, project.clientAddress)) return "client";
+  if (sameAddress(address, project.developerAddress)) return "developer";
+  return "other";
+}
+
+export function statusTone(status) {
+  switch (status) {
+    case STATUS.APPROVED:
+    case STATUS.FUNDED:
+      return "ok";
+    case STATUS.SUBMITTED:
+      return "info";
+    case STATUS.DISPUTED:
+    case STATUS.REFUNDED:
+      return "error";
+    default:
+      return "neutral";
+  }
+}
+
 /** Returns an object of field -> message. Empty object means the input is valid. */
-export function validateProjectInput(input, now = Date.now()) {
+export function validateProjectInput(input, now = Date.now(), clientAddress) {
   const e = {};
   const name = (input.name || "").trim();
   if (name.length < 3 || name.length > 80) e.name = "Enter a project name of 3 to 80 characters.";
@@ -28,10 +60,21 @@ export function validateProjectInput(input, now = Date.now()) {
   if (!/^\d*\.?\d+$/.test(amount) || Number(amount) <= 0) e.amount = "Enter an escrow amount greater than 0.";
   else if (decimals > 18) e.amount = "Use at most 18 decimal places.";
 
-  if (!ADDRESS.test((input.developerAddress || "").trim())) e.developerAddress = "Enter a wallet address that starts with 0x followed by 40 hex characters.";
+  const devAddr = (input.developerAddress || "").trim();
+  if (!ADDRESS.test(devAddr)) e.developerAddress = "Enter a wallet address that starts with 0x followed by 40 hex characters.";
+  else if (clientAddress && sameAddress(devAddr, clientAddress)) e.developerAddress = "Developer address must be different from client address.";
 
   const deadline = new Date(input.deadline).getTime();
   if (!input.deadline || Number.isNaN(deadline)) e.deadline = "Choose a deadline date and time.";
   else if (deadline <= now) e.deadline = "Choose a deadline in the future.";
   return e;
+}
+
+export async function computeBriefHash(brief) {
+  const text = `${brief.description}|${brief.pages.join(',')}|${brief.features.join(',')}`;
+  const encoder = new TextEncoder();
+  const data = encoder.encode(text);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  return '0x' + hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
 }
