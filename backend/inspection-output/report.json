@@ -1,0 +1,305 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-11-15T23:19:26+00:00",
+  "website_url": "http://127.0.0.1:8000/",
+  "disclaimer": "This report contains evidence gathered automatically. It does not decide whether payment is released. Only the client can approve or dispute.",
+  "reachability": {
+    "reachable": true,
+    "final_url": "http://127.0.0.1:8000/",
+    "status_code": 200,
+    "response_ms": 7,
+    "https": false,
+    "error": null
+  },
+  "metadata": {
+    "title": "Sunrise Bakery",
+    "description": "Neighborhood bakery serving bread, pastries and custom cakes.",
+    "lang": "en",
+    "viewport_meta": true,
+    "open_graph": {}
+  },
+  "pages": {
+    "required": [
+      {
+        "name": "Home",
+        "detected": true,
+        "matched_url": "http://127.0.0.1:8000/",
+        "method": "submitted_url",
+        "evidence": "The submitted URL loaded."
+      },
+      {
+        "name": "About",
+        "detected": true,
+        "matched_url": "http://127.0.0.1:8000/about.html",
+        "method": "navigation_link",
+        "evidence": "Link \"About\" points to http://127.0.0.1:8000/about.html, which returned status 200."
+      },
+      {
+        "name": "Menu",
+        "detected": true,
+        "matched_url": "http://127.0.0.1:8000/menu.html",
+        "method": "navigation_link",
+        "evidence": "Link \"Our Menu\" points to http://127.0.0.1:8000/menu.html, which returned status 200."
+      },
+      {
+        "name": "Contact",
+        "detected": true,
+        "matched_url": "http://127.0.0.1:8000/contact.html",
+        "method": "navigation_link",
+        "evidence": "Link \"Contact\" points to http://127.0.0.1:8000/contact.html, which returned status 200."
+      },
+      {
+        "name": "Gallery",
+        "detected": false,
+        "matched_url": "http://127.0.0.1:8000/missing.html",
+        "method": "navigation_link",
+        "evidence": "A link to \"Gallery\" exists but http://127.0.0.1:8000/missing.html returned status 404."
+      }
+    ],
+    "discovered": [
+      {
+        "url": "http://127.0.0.1:8000/",
+        "title": "Sunrise Bakery"
+      },
+      {
+        "url": "http://127.0.0.1:8000/about.html",
+        "title": "About us"
+      },
+      {
+        "url": "http://127.0.0.1:8000/menu.html",
+        "title": "Menu"
+      },
+      {
+        "url": "http://127.0.0.1:8000/contact.html",
+        "title": "Contact"
+      },
+      {
+        "url": "http://127.0.0.1:8000/missing.html",
+        "title": null
+      }
+    ]
+  },
+  "contact_form": {
+    "detected": true,
+    "forms": [
+      {
+        "page_url": "http://127.0.0.1:8000/contact.html",
+        "action": "/send",
+        "method": "post",
+        "fields": [
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "email",
+            "type": "email"
+          },
+          {
+            "name": "message",
+            "type": "textarea"
+          }
+        ],
+        "has_email_field": true,
+        "has_message_field": true,
+        "has_submit": true
+      }
+    ]
+  },
+  "screenshots": [
+    {
+      "label": "Home, desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "page_url": "http://127.0.0.1:8000/",
+      "file": "home-desktop.png",
+      "taken": true,
+      "error": null
+    },
+    {
+      "label": "Home, tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "page_url": "http://127.0.0.1:8000/",
+      "file": "home-tablet.png",
+      "taken": true,
+      "error": null
+    },
+    {
+      "label": "Home, mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "page_url": "http://127.0.0.1:8000/",
+      "file": "home-mobile.png",
+      "taken": true,
+      "error": null
+    },
+    {
+      "label": "About, desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "page_url": "http://127.0.0.1:8000/about.html",
+      "file": "about-desktop.png",
+      "taken": true,
+      "error": null
+    },
+    {
+      "label": "Our Menu, desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "page_url": "http://127.0.0.1:8000/menu.html",
+      "file": "our-menu-desktop.png",
+      "taken": true,
+      "error": null
+    },
+    {
+      "label": "Contact, desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "page_url": "http://127.0.0.1:8000/contact.html",
+      "file": "contact-desktop.png",
+      "taken": true,
+      "error": null
+    },
+    {
+      "label": "Gallery, desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "page_url": "http://127.0.0.1:8000/missing.html",
+      "file": "gallery-desktop.png",
+      "taken": true,
+      "error": null
+    }
+  ],
+  "responsiveness": {
+    "checks_run": true,
+    "viewports": [
+      {
+        "name": "Desktop",
+        "width": 1440,
+        "height": 900,
+        "horizontal_overflow": false,
+        "viewport_meta": true,
+        "error": null
+      },
+      {
+        "name": "Tablet",
+        "width": 768,
+        "height": 1024,
+        "horizontal_overflow": true,
+        "viewport_meta": true,
+        "error": null
+      },
+      {
+        "name": "Mobile",
+        "width": 390,
+        "height": 844,
+        "horizontal_overflow": true,
+        "viewport_meta": true,
+        "error": null
+      }
+    ]
+  },
+  "metrics": {
+    "lighthouse": {
+      "ran": false,
+      "performance": null,
+      "accessibility": null,
+      "seo": null,
+      "best_practices": null,
+      "error": "Lighthouse is not installed (npm install -g lighthouse)."
+    }
+  },
+  "requirements": [
+    {
+      "id": "page-home",
+      "kind": "page",
+      "text": "Home",
+      "status": "detected",
+      "method": "submitted_url",
+      "evidence": "The submitted URL loaded."
+    },
+    {
+      "id": "page-about",
+      "kind": "page",
+      "text": "About",
+      "status": "detected",
+      "method": "navigation_link",
+      "evidence": "Link \"About\" points to http://127.0.0.1:8000/about.html, which returned status 200."
+    },
+    {
+      "id": "page-menu",
+      "kind": "page",
+      "text": "Menu",
+      "status": "detected",
+      "method": "navigation_link",
+      "evidence": "Link \"Our Menu\" points to http://127.0.0.1:8000/menu.html, which returned status 200."
+    },
+    {
+      "id": "page-contact",
+      "kind": "page",
+      "text": "Contact",
+      "status": "detected",
+      "method": "navigation_link",
+      "evidence": "Link \"Contact\" points to http://127.0.0.1:8000/contact.html, which returned status 200."
+    },
+    {
+      "id": "page-gallery",
+      "kind": "page",
+      "text": "Gallery",
+      "status": "not_detected",
+      "method": "navigation_link",
+      "evidence": "A link to \"Gallery\" exists but http://127.0.0.1:8000/missing.html returned status 404."
+    },
+    {
+      "id": "feature-contact-form",
+      "kind": "feature",
+      "text": "Contact form",
+      "status": "detected",
+      "method": "form_structure",
+      "evidence": "A form on http://127.0.0.1:8000/contact.html has an email field, a message field and a submit button. Whether it delivers messages was not tested."
+    },
+    {
+      "id": "feature-mobile-layout",
+      "kind": "feature",
+      "text": "Mobile layout",
+      "status": "needs_review",
+      "method": "responsive_check",
+      "evidence": "At 390px wide the page shows horizontal overflow or lacks a viewport tag. Review the mobile screenshots."
+    },
+    {
+      "id": "feature-online-ordering",
+      "kind": "feature",
+      "text": "Online ordering",
+      "status": "needs_review",
+      "method": "keyword",
+      "evidence": "The text on http://127.0.0.1:8000/menu.html mentions \"online\". Whether it works as required needs a person to check."
+    }
+  ],
+  "incomplete_checks": [
+    {
+      "check": "lighthouse",
+      "reason": "Lighthouse is not installed (npm install -g lighthouse)."
+    }
+  ],
+  "ai_summary": {
+    "generated_by": "template",
+    "model": null,
+    "text": "The site loaded without HTTPS in 7 ms. 4 of 5 required pages were detected; not detected: Gallery. A contact form with email, message and submit fields was detected. Horizontal overflow was measured at these screen sizes: tablet, mobile. 2 checklist items need a manual look: Mobile layout, Online ordering. Checks that did not run: lighthouse.",
+    "error": "No ANTHROPIC_API_KEY is set, so a template summary was used."
+  }
+}

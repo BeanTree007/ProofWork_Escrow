@@ -1,0 +1,266 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-11-15T21:30:00+00:00",
+  "website_url": "https://sunrise-bakery.example.com",
+  "disclaimer": "This report contains evidence gathered automatically. It does not decide whether payment is released. Only the client can approve or dispute.",
+  "reachability": {
+    "reachable": true,
+    "final_url": "https://sunrise-bakery.example.com/",
+    "status_code": 200,
+    "response_ms": 412,
+    "https": true,
+    "error": null
+  },
+  "metadata": {
+    "title": "Sunrise Bakery | Fresh bread daily",
+    "description": "Neighborhood bakery serving bread, pastries and custom cakes.",
+    "lang": "en",
+    "viewport_meta": true,
+    "open_graph": {
+      "og:title": "Sunrise Bakery",
+      "og:type": "website"
+    }
+  },
+  "pages": {
+    "required": [
+      {
+        "name": "Home",
+        "detected": true,
+        "matched_url": "https://sunrise-bakery.example.com/",
+        "method": "submitted_url",
+        "evidence": "The submitted URL loaded."
+      },
+      {
+        "name": "About",
+        "detected": true,
+        "matched_url": "https://sunrise-bakery.example.com/about",
+        "method": "navigation_link",
+        "evidence": "Link \"About\" points to https://sunrise-bakery.example.com/about, which returned status 200."
+      },
+      {
+        "name": "Menu",
+        "detected": true,
+        "matched_url": "https://sunrise-bakery.example.com/menu",
+        "method": "navigation_link",
+        "evidence": "Link \"Our Menu\" points to https://sunrise-bakery.example.com/menu, which returned status 200."
+      },
+      {
+        "name": "Contact",
+        "detected": true,
+        "matched_url": "https://sunrise-bakery.example.com/contact",
+        "method": "navigation_link",
+        "evidence": "Link \"Contact\" points to https://sunrise-bakery.example.com/contact, which returned status 200."
+      },
+      {
+        "name": "Gallery",
+        "detected": false,
+        "matched_url": null,
+        "method": "navigation_link",
+        "evidence": "No internal link or URL matched \"Gallery\"."
+      }
+    ],
+    "discovered": [
+      {
+        "url": "https://sunrise-bakery.example.com/",
+        "title": "Sunrise Bakery | Fresh bread daily"
+      },
+      {
+        "url": "https://sunrise-bakery.example.com/about",
+        "title": "About us"
+      },
+      {
+        "url": "https://sunrise-bakery.example.com/menu",
+        "title": "Menu"
+      },
+      {
+        "url": "https://sunrise-bakery.example.com/contact",
+        "title": "Contact"
+      }
+    ]
+  },
+  "contact_form": {
+    "detected": true,
+    "forms": [
+      {
+        "page_url": "https://sunrise-bakery.example.com/contact",
+        "action": "/api/contact",
+        "method": "post",
+        "fields": [
+          {
+            "name": "name",
+            "type": "text"
+          },
+          {
+            "name": "email",
+            "type": "email"
+          },
+          {
+            "name": "message",
+            "type": "textarea"
+          }
+        ],
+        "has_email_field": true,
+        "has_message_field": true,
+        "has_submit": true
+      }
+    ]
+  },
+  "screenshots": [
+    {
+      "label": "Home, desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "page_url": "https://sunrise-bakery.example.com/",
+      "file": "home-desktop.png",
+      "taken": true,
+      "error": null
+    },
+    {
+      "label": "Home, tablet",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "page_url": "https://sunrise-bakery.example.com/",
+      "file": "home-tablet.png",
+      "taken": true,
+      "error": null
+    },
+    {
+      "label": "Home, mobile",
+      "viewport": {
+        "width": 390,
+        "height": 844
+      },
+      "page_url": "https://sunrise-bakery.example.com/",
+      "file": "home-mobile.png",
+      "taken": true,
+      "error": null
+    },
+    {
+      "label": "Contact, desktop",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "page_url": "https://sunrise-bakery.example.com/contact",
+      "file": "contact-desktop.png",
+      "taken": true,
+      "error": null
+    }
+  ],
+  "responsiveness": {
+    "checks_run": true,
+    "viewports": [
+      {
+        "name": "Desktop",
+        "width": 1440,
+        "height": 900,
+        "horizontal_overflow": false,
+        "viewport_meta": true,
+        "error": null
+      },
+      {
+        "name": "Tablet",
+        "width": 768,
+        "height": 1024,
+        "horizontal_overflow": false,
+        "viewport_meta": true,
+        "error": null
+      },
+      {
+        "name": "Mobile",
+        "width": 390,
+        "height": 844,
+        "horizontal_overflow": true,
+        "viewport_meta": true,
+        "error": null
+      }
+    ]
+  },
+  "metrics": {
+    "lighthouse": {
+      "ran": true,
+      "performance": 87,
+      "accessibility": 92,
+      "seo": 100,
+      "best_practices": 96,
+      "error": null
+    }
+  },
+  "requirements": [
+    {
+      "id": "page-home",
+      "kind": "page",
+      "text": "Home",
+      "status": "detected",
+      "method": "submitted_url",
+      "evidence": "The submitted URL loaded."
+    },
+    {
+      "id": "page-about",
+      "kind": "page",
+      "text": "About",
+      "status": "detected",
+      "method": "navigation_link",
+      "evidence": "Link \"About\" points to https://sunrise-bakery.example.com/about, which returned status 200."
+    },
+    {
+      "id": "page-menu",
+      "kind": "page",
+      "text": "Menu",
+      "status": "detected",
+      "method": "navigation_link",
+      "evidence": "Link \"Our Menu\" points to https://sunrise-bakery.example.com/menu, which returned status 200."
+    },
+    {
+      "id": "page-contact",
+      "kind": "page",
+      "text": "Contact",
+      "status": "detected",
+      "method": "navigation_link",
+      "evidence": "Link \"Contact\" points to https://sunrise-bakery.example.com/contact, which returned status 200."
+    },
+    {
+      "id": "page-gallery",
+      "kind": "page",
+      "text": "Gallery",
+      "status": "not_detected",
+      "method": "navigation_link",
+      "evidence": "No internal link or URL matched \"Gallery\"."
+    },
+    {
+      "id": "feature-contact-form",
+      "kind": "feature",
+      "text": "Contact form",
+      "status": "detected",
+      "method": "form_structure",
+      "evidence": "A form on https://sunrise-bakery.example.com/contact has an email field, a message field and a submit button. Whether it delivers messages was not tested."
+    },
+    {
+      "id": "feature-mobile-layout",
+      "kind": "feature",
+      "text": "Mobile layout",
+      "status": "needs_review",
+      "method": "responsive_check",
+      "evidence": "At 390px wide the page shows horizontal overflow or lacks a viewport tag. Review the mobile screenshots."
+    },
+    {
+      "id": "feature-online-ordering",
+      "kind": "feature",
+      "text": "Online ordering",
+      "status": "needs_review",
+      "method": "keyword",
+      "evidence": "The text on https://sunrise-bakery.example.com/menu mentions \"ordering\". Whether it works as required needs a person to check."
+    }
+  ],
+  "incomplete_checks": [],
+  "ai_summary": {
+    "generated_by": "ai",
+    "model": "claude-haiku-5-5",
+    "error": null,
+    "text": "The site loaded over HTTPS in 412 ms. Four of five required pages were detected; no Gallery page was found. A contact form with email, message and submit fields exists on the Contact page, though message delivery was not tested. The mobile viewport shows horizontal overflow, so the mobile screenshots are worth a look. Lighthouse reported performance 87, accessibility 92, SEO 100 and best practices 96. Online ordering is mentioned on the Menu page but could not be verified automatically."
+  }
+}
