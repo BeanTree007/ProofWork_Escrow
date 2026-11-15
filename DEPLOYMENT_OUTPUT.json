@@ -1,0 +1,10 @@
+{
+  "contract_address": "0x50b128b6d9b9AE9A2599540553Da17443bA78988",
+  "deployment_tx_hash": "3a4a37d63f0bc04a6d8e8ee3cad6fa5a2350447f0350442d52266b5427311eeb",
+  "deployer": "0xd3DeA5a104ddE855Dfa08F0f3F8040b99E280122",
+  "block_number": 80067114,
+  "review_period": 604800,
+  "chain_id": 10143,
+  "rpc_url": "https://testnet-rpc.monad.xyz",
+  "timestamp": "2026-11-15 23:12:28 UTC"
+}
