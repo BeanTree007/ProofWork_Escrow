@@ -124,7 +124,6 @@ If the review window expires with no response:
 - Escrow funds are automatically released to the developer
 
 This prevents clients from blocking payment indefinitely.
-Email reminders should be sent to both parties reminding them of their deadlines as they get closer.
 
 MVP Scope
 
@@ -200,6 +199,7 @@ Smart Contract States
 - Disputed
 - Expired
 - Refunded
+- Extension Requested
 
 Repository Structure
 

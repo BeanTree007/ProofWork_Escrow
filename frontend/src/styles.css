@@ -1,0 +1,45 @@
+:root {
+  font-family: system-ui, sans-serif;
+  color: #172033;
+  background: #f6f7fb;
+}
+
+body {
+  margin: 0;
+}
+
+header {
+  background: #18243a;
+  padding: 1rem;
+}
+
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+  max-width: 70rem;
+  margin: auto;
+  color: white;
+}
+
+nav a {
+  color: #dce5f7;
+}
+
+nav a.active {
+  color: white;
+  font-weight: 700;
+}
+
+main {
+  max-width: 70rem;
+  padding: 1.5rem;
+  margin: auto;
+}
+
+.notice {
+  padding: 0.75rem;
+  background: #fff2cc;
+  border: 1px solid #e3c36a;
+}
