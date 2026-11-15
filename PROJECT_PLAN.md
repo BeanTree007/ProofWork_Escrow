@@ -134,6 +134,24 @@ Do not attempt to solve arbitration.
 
 The purpose of the dispute state is to demonstrate that neither party can unilaterally obtain funds while a disagreement exists.
 
+MVP Workflow
+
+Client
+    ↓
+Creates Contract
+    ↓
+Locks Funds in Monad Escrow
+    ↓
+Developer Builds Website
+    ↓
+Developer Submits URL
+    ↓
+Inspector Runs
+    ↓
+Client Reviews Report
+    ↓
+Approve or Dispute
+
 Tech Stack
 
 - React frontend
