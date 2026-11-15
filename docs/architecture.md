@@ -32,35 +32,13 @@ transaction deposits funds atomically. The developer accepts, builds, and
 submits a URL by the deadline; the inspection system then gathers evidence.
 The client reviews the URL and report and approves or disputes.
 
-The interface lists the requested states: `Created`, `Funded`, `InProgress`,
-`Submitted`, `Approved`, `Disputed`, `Expired`, and `Refunded`. Extension
-requests are separate pending data, not a replacement project state. The
-eventual implementation must define and test exact transition guards and
-event/data schemas with both developers; in particular:
-
-- Creation and funding must be atomic, without an externally observable
-  unfunded project presented as escrowed. Define how `Created` is represented
-  when the persisted project starts `Funded`.
-- Only the designated developer can accept, submit and request an extension;
-  only the client can approve or deny an extension, approve, dispute or claim
-  a missed-deadline refund. Approved extensions update the deadline; denied
-  requests do not. Specify the timing rules and prevent stale requests.
-- Before submission, a missed deadline with no approved extension permits the
-  client to reclaim funds. Define how `Expired` is recorded and how it moves
-  to `Refunded`, including boundary timestamps and acceptance edge cases.
-- Submission starts a finite review period. Approval pays the developer;
-  dispute locks funds in `Disputed` with no arbitration or unilateral payout.
-  After the review period, an eligible transaction must release funds to the
-  developer if no approval or dispute occurred. Blockchains do not run timers
-  themselves: someone must call the settlement function. Define and test exact
-  cutoff boundaries and the terminal state for this payout.
-- Use checks-effects-interactions, guard against reentrancy, test failed
-  transfers and prevent double payout. Review and test the contract before
-  any deployment or use of funds.
-
-The Solidity interface is a planning boundary, not a final ABI or a security
-specification. Decide the review duration, metadata storage, transition/event
-schema and contract deployment model jointly before implementing them.
+The final MVP states, transitions, permissions, validations, events, accounting
+model, edge cases, and security considerations are in
+[smart-contract-architecture.md](./smart-contract-architecture.md). That
+document supersedes the earlier interface sketch as the design proposal; it is
+not an implementation or security audit. The current Solidity interface
+remains an outdated skeleton until both developers accept the design and
+derive a tested ABI from it.
 
 ## Developer A: application and inspection
 
