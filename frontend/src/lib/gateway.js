@@ -46,6 +46,11 @@ export function canWork(p) {
 // Check if blockchain is available and wallet is connected
 function isBlockchainReady() {
   try {
+    // Check for test wallet override first (for testing with different addresses)
+    const testWallet = localStorage.getItem("proofwork.testWallet");
+    if (testWallet) return true;
+    
+    // Otherwise check MetaMask connection
     const addr = blockchain.getConnectedAccount();
     return !!addr;
   } catch {
@@ -137,7 +142,8 @@ export async function listProjectsForAddress(address) {
 }
 
 export async function getProject(id) {
-  const useChain = isBlockchainReady();
+  const testWallet = localStorage.getItem("proofwork.testWallet");
+  const useChain = isBlockchainReady() && !testWallet;  // Don't use chain for test wallets
   
   if (useChain) {
     try {
@@ -164,7 +170,7 @@ export async function getProject(id) {
     }
   }
   
-  // Demo mode or fallback
+  // Demo mode or test wallet fallback
   const p = load().find((x) => x.id === id);
   return p ? publicView(p) : null;
 }
@@ -178,7 +184,8 @@ export async function getBrief(id, address) {
 }
 
 export async function approveProject(id, address) {
-  const useChain = isBlockchainReady();
+  const testWallet = localStorage.getItem("proofwork.testWallet");
+  const useChain = isBlockchainReady() && !testWallet;  // Don't use chain if it's a test wallet
   
   if (useChain) {
     try {
@@ -190,7 +197,7 @@ export async function approveProject(id, address) {
     }
   }
   
-  // Demo mode
+  // Demo mode or test wallet fallback
   await wait(600);
   return change(id, (p) => {
     if (!sameAddress(address, p.clientAddress)) throw fail("FORBIDDEN", "Only the client can approve this project.");
@@ -221,7 +228,8 @@ export async function disputeProject(id, address) {
 }
 
 export async function submitWebsite(id, address, websiteURL) {
-  const useChain = isBlockchainReady();
+  const testWallet = localStorage.getItem("proofwork.testWallet");
+  const useChain = isBlockchainReady() && !testWallet;  // Don't use chain if it's a test wallet
   
   if (useChain) {
     try {
@@ -232,7 +240,7 @@ export async function submitWebsite(id, address, websiteURL) {
     }
   }
   
-  // Demo mode
+  // Demo mode or test wallet fallback
   await wait(600);
   return change(id, (p) => {
     if (!sameAddress(address, p.developerAddress)) throw fail("FORBIDDEN", "Only the developer can submit the website.");

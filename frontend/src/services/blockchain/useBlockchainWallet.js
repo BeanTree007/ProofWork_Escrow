@@ -9,10 +9,16 @@ import {
 let listeners = new Set();
 let cachedAccount = null;
 
-// Initialize with current account
+// Initialize with current account or test override
 (async () => {
   try {
-    cachedAccount = await getConnectedAccount().catch(() => null);
+    // Check for test wallet override first
+    const testWallet = localStorage.getItem("proofwork.testWallet");
+    if (testWallet) {
+      cachedAccount = testWallet;
+    } else {
+      cachedAccount = await getConnectedAccount().catch(() => null);
+    }
   } catch {
     cachedAccount = null;
   }
@@ -28,7 +34,11 @@ export function useBlockchainWallet() {
       listeners.add(listener);
       return () => listeners.delete(listener);
     },
-    () => cachedAccount
+    () => {
+      // Check for test wallet override on every read
+      const testWallet = localStorage.getItem("proofwork.testWallet");
+      return testWallet || cachedAccount;
+    }
   );
 
   const connect = async () => {

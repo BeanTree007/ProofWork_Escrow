@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 import PageHeader from "../components/PageHeader";
 import WalletButton from "../components/WalletButton";
 import { submitWebsite } from "../lib/gateway";
-import { useWallet } from "../lib/wallet";
+import { useBlockchainWallet } from "../services/blockchain/useBlockchainWallet";
 
 function Field({ id, label, hint, error, children }) {
   return (
@@ -21,7 +21,7 @@ function Field({ id, label, hint, error, children }) {
 
 export default function SubmitWebsite() {
   const [searchParams] = useSearchParams();
-  const { address } = useWallet();
+  const { address } = useBlockchainWallet();
   const projectId = searchParams.get("project") || searchParams.get("projectId") || "";
   const formRef = useRef(null);
 
