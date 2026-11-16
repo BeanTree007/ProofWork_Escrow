@@ -2,6 +2,7 @@
 // When wallet is connected: calls real blockchain functions
 // When wallet disconnected: falls back to demo mode (localStorage)
 import { STATUS, validateProjectInput, computeBriefHash, roleFor, sameAddress } from "./projectModel.js";
+import { ethers } from "ethers";
 import * as blockchain from "../services/blockchain";
 
 const KEY = "proofwork.demo.projects";
@@ -35,6 +36,11 @@ function change(id, fn) {
   list[i] = fn(list[i]);
   save(list);
   return publicView(list[i]);
+}
+
+// Demo projects need the developer to accept first; the deployed contract has no accept step.
+export function canWork(p) {
+  return p.status === STATUS.IN_PROGRESS || (p.onChain && p.status === STATUS.FUNDED);
 }
 
 // Check if blockchain is available and wallet is connected
@@ -137,19 +143,22 @@ export async function getProject(id) {
     try {
       // Try to fetch from blockchain
       const onChainProject = await blockchain.getProject(parseInt(id));
-      return {
-        id: id,
-        client: onChainProject.client,
-        developer: onChainProject.developer,
-        amount: (BigInt(onChainProject.escrowAmount) / BigInt(1e18)).toString(),
+      const local = load().find((x) => x.id === id);
+      return publicView({
+        name: `Project ${id}`,
+        extensions: [],
+        ...local,
+        id,
+        clientAddress: onChainProject.client,
+        developerAddress: onChainProject.developer,
+        amount: ethers.formatEther(onChainProject.escrowAmount),
         escrowAmount: onChainProject.escrowAmount,
         status: onChainProject.state,
-        state: onChainProject.state,
         deadline: new Date(onChainProject.deadline * 1000).toISOString(),
         websiteURL: onChainProject.websiteURL || null,
         onChain: true,
         createdAt: new Date(onChainProject.createdAt * 1000).toISOString(),
-      };
+      });
     } catch (error) {
       console.warn("Failed to fetch from blockchain, using demo:", error);
     }
@@ -227,7 +236,7 @@ export async function submitWebsite(id, address, websiteURL) {
   await wait(600);
   return change(id, (p) => {
     if (!sameAddress(address, p.developerAddress)) throw fail("FORBIDDEN", "Only the developer can submit the website.");
-    if (p.status !== STATUS.FUNDED) throw fail("BAD_STATE", "Project must be funded to submit website.");
+    if (!canWork(p)) throw fail("BAD_STATE", "Accept the project before submitting a website.");
     return { ...p, status: STATUS.SUBMITTED, websiteURL };
   });
 }
@@ -249,7 +258,7 @@ export async function requestExtension(id, address, requestedDeadline) {
   await wait(600);
   return change(id, (p) => {
     if (!sameAddress(address, p.developerAddress)) throw fail("FORBIDDEN", "Only the developer can request extension.");
-    if (p.status !== STATUS.FUNDED) throw fail("BAD_STATE", "Only funded projects can request extension.");
+    if (!canWork(p)) throw fail("BAD_STATE", "Accept the project before requesting an extension.");
     return { ...p, extensionPending: true, extensionRequest: { requestedDeadline } };
   });
 }
@@ -275,5 +284,28 @@ export async function respondToExtension(id, address, approve) {
       return { ...p, deadline: p.extensionRequest.requestedDeadline, extensionPending: false, extensionRequest: null };
     }
     return { ...p, extensionPending: false, extensionRequest: null };
+  });
+}
+
+// Demo only: the deployed contract has no accept step (on-chain projects are workable once funded).
+export async function acceptProject(id, address, briefHash) {
+  await wait(600);
+  return change(id, (p) => {
+    if (p.onChain) throw fail("BAD_STATE", "On-chain projects do not need to be accepted.");
+    if (!sameAddress(address, p.developerAddress)) throw fail("FORBIDDEN", "Only the developer can accept this project.");
+    if (p.status !== STATUS.FUNDED) throw fail("BAD_STATE", "Only funded projects can be accepted.");
+    if (briefHash !== p.briefHash) throw fail("HASH_MISMATCH", "The brief does not match the contract.");
+    return { ...p, status: STATUS.IN_PROGRESS, acceptedAt: new Date().toISOString() };
+  });
+}
+
+// Demo only: the client can cancel and get a refund until the developer accepts.
+export async function cancelProject(id, address) {
+  await wait(600);
+  return change(id, (p) => {
+    if (p.onChain) throw fail("BAD_STATE", "The deployed contract does not support cancelling. Funds can be reclaimed after the deadline.");
+    if (!sameAddress(address, p.clientAddress)) throw fail("FORBIDDEN", "Only the client can cancel this project.");
+    if (p.status !== STATUS.FUNDED) throw fail("BAD_STATE", "Projects can only be cancelled before the developer accepts.");
+    return { ...p, status: STATUS.REFUNDED };
   });
 }

@@ -1,7 +1,9 @@
-import { useSearchParams, useNavigate, Link } from "react-router-dom";
+import { useSearchParams, Link } from "react-router-dom";
 import { useState, useRef } from "react";
-import * as blockchain from "../services/blockchain";
 import PageHeader from "../components/PageHeader";
+import WalletButton from "../components/WalletButton";
+import { submitWebsite } from "../lib/gateway";
+import { useWallet } from "../lib/wallet";
 
 function Field({ id, label, hint, error, children }) {
   return (
@@ -19,8 +21,8 @@ function Field({ id, label, hint, error, children }) {
 
 export default function SubmitWebsite() {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
-  const projectId = searchParams.get("projectId") || "";
+  const { address } = useWallet();
+  const projectId = searchParams.get("project") || searchParams.get("projectId") || "";
   const formRef = useRef(null);
 
   const [form, setForm] = useState({ projectId, websiteURL: "" });
@@ -47,10 +49,13 @@ export default function SubmitWebsite() {
       if (!form.projectId || form.projectId.trim().length === 0) {
         newErrors.projectId = "Project ID is required";
       }
-      if (!form.websiteURL || form.websiteURL.trim().length === 0) {
+      const url = form.websiteURL.trim();
+      if (!url) {
         newErrors.websiteURL = "Website URL is required";
-      } else if (form.websiteURL.length > 2048) {
+      } else if (url.length > 2048) {
         newErrors.websiteURL = "URL too long (max 2048 characters)";
+      } else if (!/^https?:\/\/[^\s/]+/i.test(url)) {
+        newErrors.websiteURL = "Enter a full URL starting with http:// or https://";
       }
 
       if (Object.keys(newErrors).length) {
@@ -60,22 +65,11 @@ export default function SubmitWebsite() {
         return;
       }
 
-      const result = await blockchain.submitWebsite(
-        parseInt(form.projectId),
-        form.websiteURL.trim()
-      );
-
-      setSuccess({
-        txHash: result.txHash,
-        projectId: form.projectId,
-      });
+      const id = form.projectId.trim();
+      const project = await submitWebsite(id, address, form.websiteURL.trim());
+      setSuccess({ projectId: id, websiteURL: project?.websiteURL || form.websiteURL.trim() });
     } catch (err) {
-      const msg = err.message || "Failed to submit website";
-      if (msg.includes("state")) {
-        setErrors({ general: "Project is not in Funded state. It may already have a submission." });
-      } else {
-        setErrors({ general: msg });
-      }
+      setErrors({ general: err.message || "Failed to submit website" });
     } finally {
       setLoading(false);
     }
@@ -88,14 +82,17 @@ export default function SubmitWebsite() {
         <div className="card stack">
           <span className="badge badge-ok">Submitted</span>
           <dl className="summary">
-            <dt>Transaction Hash</dt>
-            <dd className="mono">{success.txHash.slice(0, 10)}...</dd>
             <dt>Project ID</dt>
             <dd className="mono">{success.projectId}</dd>
+            <dt>Website</dt>
+            <dd className="mono wrap">{success.websiteURL}</dd>
           </dl>
           <div className="actions">
-            <Link className="btn" to={`/dashboard?id=${success.projectId}`}>
-              View dashboard
+            <Link className="btn" to={`/projects/${encodeURIComponent(success.projectId)}`}>
+              View project
+            </Link>
+            <Link className="btn btn-secondary" to={`/report?project=${encodeURIComponent(success.projectId)}`}>
+              View verification report
             </Link>
             <button
               className="btn btn-secondary"
@@ -122,13 +119,19 @@ export default function SubmitWebsite() {
         title="Submit Website"
         lede="Developer submits the completed website URL for client review."
       />
+      {!address && (
+        <div className="card stack">
+          <h2>Connect the developer wallet</h2>
+          <p>Only the developer wallet for the project can submit a website.</p>
+          <WalletButton />
+        </div>
+      )}
       <div className="create-layout">
         <form ref={formRef} className="card stack" onSubmit={onSubmit} noValidate>
           <Field id="projectId" label="Project ID" error={err("projectId")}>
             <input
               id="projectId"
               className="input"
-              type="number"
               value={form.projectId}
               onChange={onText("projectId")}
               aria-invalid={!!err("projectId") || undefined}
@@ -153,7 +156,7 @@ export default function SubmitWebsite() {
           {errors.general && <p className="error" role="alert">{errors.general}</p>}
 
           <div className="actions">
-            <button className="btn" type="submit" disabled={loading}>
+            <button className="btn" type="submit" disabled={loading || !address}>
               {loading ? "Submitting..." : "Submit Website"}
             </button>
             <Link className="btn btn-secondary" to="/dashboard">

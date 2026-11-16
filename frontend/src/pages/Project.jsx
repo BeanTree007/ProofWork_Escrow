@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import PageHeader from "../components/PageHeader";
 import WalletButton from "../components/WalletButton";
-import { acceptProject, cancelProject, getBrief, getProject } from "../lib/gateway";
+import { buildSignInMessage, useWallet } from "../lib/wallet";
+import { acceptProject, canWork, cancelProject, getBrief, getProject } from "../lib/gateway";
 import { STATUS, roleFor, shortAddress, statusTone } from "../lib/projectModel";
 import { useBlockchainWallet } from "../services/blockchain/useBlockchainWallet";
 
@@ -63,8 +64,9 @@ export default function Project() {
     );
   }
 
-  const awaiting = project.status === STATUS.FUNDED;
-  const working = project.status === STATUS.IN_PROGRESS;
+  const working = canWork(project);
+  const awaiting = project.status === STATUS.FUNDED && !working; // demo projects wait for the developer to accept
+  const submitted = project.status === STATUS.SUBMITTED;
 
   return (
     <section>
@@ -76,6 +78,7 @@ export default function Project() {
           <dt>Deadline</dt><dd>{new Date(project.deadline).toLocaleString()}</dd>
           <dt>Client</dt><dd className="mono" title={project.clientAddress}>{shortAddress(project.clientAddress)}</dd>
           <dt>Developer</dt><dd className="mono" title={project.developerAddress}>{shortAddress(project.developerAddress)}</dd>
+          {project.websiteURL && (<><dt>Submitted site</dt><dd className="mono wrap"><a href={project.websiteURL} target="_blank" rel="noreferrer noopener">{project.websiteURL}</a></dd></>)}
           {role && role !== "other" && (<><dt>You are the</dt><dd>{role}</dd></>)}
         </dl>
         {project.escrowSimulated && <p className="hint-note">Demo mode: escrow is simulated in this browser.</p>}
@@ -143,6 +146,11 @@ export default function Project() {
               <Link className="btn" to={`/submit?project=${id}`}>Submit deliverable</Link>
               <Link className="btn btn-secondary" to={`/extensions?project=${id}`}>Request extension</Link>
             </div>
+          ) : submitted ? (
+            <>
+              <p>Your website is with the client for review.</p>
+              <div className="actions"><Link className="btn btn-secondary" to={`/report?project=${id}`}>View verification report</Link></div>
+            </>
           ) : (
             <p className="hint-note">No developer actions are available while the project is {project.status.toLowerCase()}.</p>
           )}
@@ -176,7 +184,15 @@ export default function Project() {
       )}
 
       {role === "client" && working && (
-        <div className="card"><h2>Work in progress</h2><p>The developer accepted the project. You will be able to review their submission here.</p></div>
+        <div className="card"><h2>Work in progress</h2><p>{project.onChain ? "The developer is working on the project." : "The developer accepted the project."} You will be able to review their submission here.</p></div>
+      )}
+
+      {role === "client" && submitted && (
+        <div className="card stack">
+          <h2>Review the submission</h2>
+          <p>The developer submitted a website. Run the inspector, review the evidence and the site itself, then approve or raise a dispute.</p>
+          <div className="actions"><Link className="btn" to={`/report?project=${id}`}>Open verification report</Link></div>
+        </div>
       )}
     </section>
   );
