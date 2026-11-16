@@ -20,11 +20,13 @@ React UI -- wallet / transactions --> Monad escrow contract
                                 GPT-4o: evidence-based human-readable summary
 ```
 
-The MVP escrow contract and Foundry tests are implemented, but the contract
-has not been deployed. Only the health endpoint works in the application;
-project routes, the inspection pipeline, wallet integration and persistence
-remain TODOs. The frontend does not call the project API or pretend
-transactions succeeded.
+The escrow contract is implemented, tested and deployed to Monad testnet. The
+frontend sends every escrow action as a wallet transaction and reads project state
+over the public RPC; failed transactions are reported, never simulated. The Flask
+API stores project briefs keyed by the contract's `detailsHash` and runs the
+inspection pipeline. A browser-only demo mode (test wallet) remains for
+walkthroughs and is labelled as simulated on every page. API authentication is
+still open: briefs and inspections are reachable by anyone who knows the IDs.
 
 ## Workflow and contract handoff
 

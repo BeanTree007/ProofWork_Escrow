@@ -101,27 +101,44 @@ export function getConnectedAccount() {
   return currentAccount;
 }
 
-// Listen for account changes
-if (typeof window !== 'undefined' && window.ethereum) {
-  window.ethereum.on('accountsChanged', (accounts) => {
-    if (accounts.length === 0) {
-      currentAccount = null;
-      signer = null;
-    } else {
+const accountListeners = new Set();
+
+/** Subscribe to MetaMask account switches. Returns an unsubscribe function. */
+export function onAccountChange(listener) {
+  accountListeners.add(listener);
+  return () => accountListeners.delete(listener);
+}
+
+/** Restore a connection the user already authorized, without prompting. */
+export async function restoreConnection() {
+  if (typeof window === 'undefined' || !window.ethereum) return null;
+  try {
+    const accounts = await window.ethereum.request({ method: 'eth_accounts' });
+    if (accounts?.length) {
       currentAccount = accounts[0];
-      signer = null; // Will be recreated on next use
+      provider = new ethers.BrowserProvider(window.ethereum);
+      signer = null;
     }
-    // Notify React hook of account change
-    try {
-      const { notifyWalletChanged } = require('./useBlockchainWallet');
-      notifyWalletChanged(currentAccount);
-    } catch {
-      // Hook may not be loaded yet
-    }
+  } catch {
+    /* wallet locked or unavailable */
+  }
+  return currentAccount;
+}
+
+/** Forget the connection in this app (MetaMask keeps its own site permission). */
+export function disconnectWallet() {
+  currentAccount = null;
+  signer = null;
+}
+
+if (typeof window !== 'undefined' && window.ethereum?.on) {
+  window.ethereum.on('accountsChanged', (accounts) => {
+    currentAccount = accounts.length ? accounts[0] : null;
+    signer = null; // recreated for the new account on next use
+    accountListeners.forEach((listener) => listener(currentAccount));
   });
 
   window.ethereum.on('chainChanged', () => {
-    // Reload on chain change
     location.reload();
   });
 }

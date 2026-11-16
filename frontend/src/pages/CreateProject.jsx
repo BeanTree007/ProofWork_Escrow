@@ -2,7 +2,7 @@ import { useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import PageHeader from "../components/PageHeader";
 import TagInput from "../components/TagInput";
-import { createProject } from "../lib/gateway";
+import { chainMode, createProject } from "../lib/gateway";
 import { useBlockchainWallet } from "../services/blockchain/useBlockchainWallet";
 import { REVIEW_WINDOW_DAYS } from "../lib/projectModel";
 
@@ -55,7 +55,7 @@ export default function CreateProject() {
       if (err.fieldErrors) {
         setErrors(err.fieldErrors);
         focusFirstError();
-      } else if (err.code === "NO_WALLET") {
+      } else if (err.code === "NO_WALLET" || err.code === "TX_FAILED") {
         setSubmitError(err.message);
       } else {
         setSubmitError("The project could not be created. Check your connection and try again.");
@@ -77,7 +77,12 @@ export default function CreateProject() {
             <dt>Developer</dt><dd className="mono wrap">{created.developerAddress}</dd>
             <dt>Deadline</dt><dd>{new Date(created.deadline).toLocaleString()}</dd>
           </dl>
-          <p className="hint-note">Demo mode: no real transaction was sent. Funding is simulated until the Monad contract is connected.</p>
+          {created.onChain ? (
+            <p className="hint-note">Funded on Monad testnet in transaction <span className="mono wrap">{created.txHash}</span>. Send the developer the project link; they can start straight away.</p>
+          ) : (
+            <p className="hint-note">Demo mode: no real transaction was sent. Funding is simulated in this browser.</p>
+          )}
+          {created.briefWarning && <p className="error" role="alert">{created.briefWarning}</p>}
           <div className="actions">
             <Link className="btn" to={`/projects/${encodeURIComponent(created.id)}`}>Open project</Link>
             <Link className="btn btn-secondary" to="/dashboard">Go to dashboard</Link>
@@ -134,7 +139,7 @@ export default function CreateProject() {
           {!address && <p className="hint-note">Connect a wallet (top right) to fund escrow. Your wallet becomes the client on the contract.</p>}
           {submitError && <p className="error" role="alert">{submitError}</p>}
           <div className="actions">
-            <button className="btn" type="submit" disabled={busy || !address}>{busy ? "Funding escrow..." : "Create project and fund escrow"}</button>
+            <button className="btn" type="submit" disabled={busy || !address}>{busy ? (chainMode() ? "Confirm in your wallet..." : "Funding escrow...") : "Create project and fund escrow"}</button>
           </div>
         </form>
 

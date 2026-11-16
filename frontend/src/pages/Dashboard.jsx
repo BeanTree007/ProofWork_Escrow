@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import WithdrawCard from "../components/WithdrawCard";
 import { Link } from "react-router-dom";
 import PageHeader from "../components/PageHeader";
 import { listProjectsForAddress } from "../lib/gateway";
@@ -8,18 +9,22 @@ import { useBlockchainWallet } from "../services/blockchain/useBlockchainWallet"
 export default function Dashboard() {
   const { address } = useBlockchainWallet();
   const [items, setItems] = useState(null);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     setItems(null);
+    setError("");
     if (!address) return;
     let live = true;
-    listProjectsForAddress(address).then((l) => live && setItems(l));
+    listProjectsForAddress(address).then((l) => live && setItems(l)).catch((e) => { if (live) { setItems([]); setError(e.message); } });
     return () => { live = false; };
   }, [address]);
 
   return (
     <section>
       <PageHeader title="My projects" lede="Projects where your connected wallet is the client or the developer." actions={<Link className="btn" to="/create">Create a project</Link>} />
+      {address && <WithdrawCard address={address} />}
+      {error && <p className="error" role="alert">{error}</p>}
       {!address ? (
         <div className="card stack"><h2>Connect your wallet</h2><p>Your projects are found by wallet address. No sign-up is needed.</p></div>
       ) : items === null ? (

@@ -1,72 +1,65 @@
 import { useSyncExternalStore } from 'react';
 import {
   connectWallet as connectWalletImpl,
-  getConnectedAccount,
-  isConnected,
+  disconnectWallet,
+  onAccountChange,
+  restoreConnection,
 } from './wallet';
 
-// External store for wallet state
-let listeners = new Set();
-let cachedAccount = null;
+// Test override: WalletButton can store an address to act as in demo mode (no MetaMask).
+export const TEST_WALLET_KEY = 'proofwork.testWallet';
 
-// Initialize with current account or test override
-(async () => {
+export function getTestWallet() {
   try {
-    // Check for test wallet override first
-    const testWallet = localStorage.getItem("proofwork.testWallet");
-    if (testWallet) {
-      cachedAccount = testWallet;
-    } else {
-      cachedAccount = await getConnectedAccount().catch(() => null);
-    }
+    return localStorage.getItem(TEST_WALLET_KEY);
   } catch {
-    cachedAccount = null;
+    return null;
   }
-})();
-
-function notifyListeners() {
-  listeners.forEach(listener => listener());
 }
 
+const listeners = new Set();
+let cachedAccount = null;
+
+function setAccount(account) {
+  cachedAccount = account;
+  listeners.forEach((listener) => listener());
+}
+
+onAccountChange(setAccount);
+restoreConnection().then((account) => account && setAccount(account));
+
+function subscribe(listener) {
+  listeners.add(listener);
+  return () => listeners.delete(listener);
+}
+
+const snapshot = () => getTestWallet() || cachedAccount;
+
 export function useBlockchainWallet() {
-  const account = useSyncExternalStore(
-    (listener) => {
-      listeners.add(listener);
-      return () => listeners.delete(listener);
-    },
-    () => {
-      // Check for test wallet override on every read
-      const testWallet = localStorage.getItem("proofwork.testWallet");
-      return testWallet || cachedAccount;
-    }
-  );
+  const account = useSyncExternalStore(subscribe, snapshot);
+  const testMode = !!getTestWallet();
 
   const connect = async () => {
-    try {
-      const result = await connectWalletImpl();
-      cachedAccount = result;
-      notifyListeners();
-      return result;
-    } catch (error) {
-      throw error;
-    }
+    const result = await connectWalletImpl();
+    setAccount(result);
+    return result;
   };
 
   const disconnect = () => {
-    cachedAccount = null;
-    notifyListeners();
+    disconnectWallet();
+    setAccount(null);
   };
 
   return {
     address: account,
     connected: !!account,
+    testMode,
     connect,
     disconnect,
   };
 }
 
-// Manual notify for external changes (e.g., MetaMask account switch)
+// Kept for callers that report account changes themselves.
 export function notifyWalletChanged(newAccount) {
-  cachedAccount = newAccount;
-  notifyListeners();
+  setAccount(newAccount);
 }

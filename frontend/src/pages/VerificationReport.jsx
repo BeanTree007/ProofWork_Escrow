@@ -2,10 +2,10 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import PageHeader from "../components/PageHeader";
 import TagInput from "../components/TagInput";
-import { approveProject, disputeProject, getBrief, getProject } from "../lib/gateway";
+import { approveProject, canReview, disputeProject, getBrief, getProject } from "../lib/gateway";
 import { STATUS, roleFor, statusTone } from "../lib/projectModel";
 import { getReport, runInspection, screenshotUrl } from "../lib/reportApi";
-import { useWallet } from "../lib/wallet";
+import { useBlockchainWallet } from "../services/blockchain/useBlockchainWallet";
 
 // Renders the evidence report described in docs/report-contract.md.
 // Rules: the report never decides; checks listed in incomplete_checks are "not checked", never a pass;
@@ -305,7 +305,7 @@ function Decision({ project, address, onUpdated }) {
   return (
     <div className="card stack decision">
       <h2>Your decision</h2>
-      <p>The report above is evidence only. Review the website yourself, then choose. Approving releases {project.amount} MON to the developer. Raising a dispute keeps the funds locked in escrow.</p>
+      <p>The report above is evidence only. Review the website yourself, then choose before {new Date(project.reviewDeadline).toLocaleString()}. Approving releases {project.amount} MON to the developer. Raising a dispute keeps the funds locked in escrow.</p>
       {error && <p className="error" role="alert">{error}</p>}
       {confirm ? (
         <div className="actions">
@@ -332,7 +332,7 @@ export default function VerificationReport() {
 }
 
 function ReportView({ projectId }) {
-  const { address, hasSigned } = useWallet();
+  const { address } = useBlockchainWallet();
   const [project, setProject] = useState(undefined);
   const [brief, setBrief] = useState(null);
   const [report, setReport] = useState(undefined); // undefined = loading, null = none yet
@@ -349,13 +349,14 @@ function ReportView({ projectId }) {
   }, [projectId]);
 
   const role = project && address ? roleFor(project, address) : null;
-  const signed = !!address && hasSigned(projectId);
+  const isParty = role === "client" || role === "developer";
   useEffect(() => {
-    if (!project || !signed || role === "other") return;
+    setBrief(null);
+    if (!isParty) return;
     let live = true;
     getBrief(projectId, address).then((b) => live && setBrief(b)).catch(() => {});
     return () => { live = false; };
-  }, [projectId, address, signed, role, project]);
+  }, [projectId, address, isParty]);
 
   const initialForm = useMemo(() => {
     const fromReport = (kind) => report?.requirements.filter((r) => r.kind === kind).map((r) => r.text) ?? [];
@@ -391,7 +392,7 @@ function ReportView({ projectId }) {
 
   if (report === undefined) return <section><PageHeader title={title} lede={lede} /><p>Loading report...</p></section>;
 
-  const canDecide = role === "client" && project?.status === STATUS.SUBMITTED;
+  const canDecide = role === "client" && canReview(project);
   const formVisible = !report || showForm;
 
   return (
@@ -444,7 +445,11 @@ function ReportView({ projectId }) {
 
           {canDecide && <Decision project={project} address={address} onUpdated={setProject} />}
           {role === "client" && project && !canDecide && (
-            <p className="hint-note">Approve and dispute are available while the project is Submitted. It is currently {project.status}.</p>
+            <p className="hint-note">
+              {project.status === STATUS.SUBMITTED
+                ? "The review window has closed, so approve and dispute are no longer available. The developer can release the escrow from the project page."
+                : `Approve and dispute are available while the project is Submitted. It is currently ${project.status}.`}
+            </p>
           )}
         </>
       )}

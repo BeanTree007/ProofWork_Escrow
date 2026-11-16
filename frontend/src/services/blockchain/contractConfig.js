@@ -20,3 +20,7 @@ export function getContractAddress() {
 export function getRpcUrl() {
   return CONFIG.rpcUrl;
 }
+
+export function isChainConfigured() {
+  return /^0x[a-fA-F0-9]{40}$/.test(CONFIG.contractAddress || '');
+}

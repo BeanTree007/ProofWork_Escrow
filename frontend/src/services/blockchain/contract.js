@@ -3,16 +3,53 @@ import { getProvider, getSigner } from './wallet';
 import { getContractAddress, getRpcUrl } from './contractConfig';
 import ABI from '../../contract-abi.json';
 
-let contractInstance = null;
 let readContract = null;
 
+// Built per call: the signer changes when the user switches MetaMask accounts.
 async function getContract() {
-  if (!contractInstance) {
-    const signer = await getSigner();
-    const contractAddr = getContractAddress();
-    contractInstance = new ethers.Contract(contractAddr, ABI, signer);
+  const signer = await getSigner();
+  return new ethers.Contract(getContractAddress(), ABI, signer);
+}
+
+// Turns contract reverts and wallet rejections into messages a person can act on.
+const REVERT_MESSAGES = {
+  ActionWindowClosed: 'The deadline for this action has passed.',
+  DeadlineNotReached: 'The deadline has not passed yet.',
+  ExtensionAlreadyPending: 'An extension request is already waiting for the client.',
+  NoPendingExtension: 'There is no pending extension request.',
+  InvalidRequestedDeadline: 'The new deadline must be later than the current deadline.',
+  Unauthorized: 'This wallet is not allowed to do that for this project.',
+  InvalidState: 'The project is not in the right state for that action.',
+  InvalidStateForAction: 'The project is not in the right state for that action.',
+  NoClaimableBalance: 'There is nothing to withdraw for this wallet.',
+  ProjectNotFound: 'No project exists with this ID on the contract.',
+  EmptyWebsiteURL: 'Enter a website URL.',
+  WebsiteURLTooLong: 'The website URL is too long.',
+  InvalidDeadline: 'Choose a deadline in the future.',
+  InvalidDeveloper: 'Enter a valid developer address.',
+  DeveloperCannotBeClient: 'The developer must be a different wallet from the client.',
+  InvalidEscrowAmount: 'Enter an escrow amount greater than 0.',
+};
+
+export function describeTxError(err) {
+  if (err?.code === 'ACTION_REJECTED' || err?.info?.error?.code === 4001) {
+    return 'You rejected the transaction in your wallet. Nothing was sent.';
   }
-  return contractInstance;
+  const name = err?.revert?.name;
+  if (name && REVERT_MESSAGES[name]) return REVERT_MESSAGES[name];
+  if (err?.code === 'INSUFFICIENT_FUNDS') return 'This wallet does not have enough MON for the amount and gas.';
+  return err?.shortMessage || err?.message || 'The transaction failed.';
+}
+
+async function send(method, ...args) {
+  const contract = await getContract();
+  try {
+    const tx = await contract[method](...args);
+    const receipt = await tx.wait();
+    return { txHash: receipt.hash, blockNumber: receipt.blockNumber, receipt, contract };
+  } catch (err) {
+    throw Object.assign(new Error(describeTxError(err)), { code: 'TX_FAILED', cause: err });
+  }
 }
 
 async function getReadContract() {
@@ -52,15 +89,25 @@ function formatProjectResponse(project) {
   };
 }
 
+/** Reads a project over the public RPC (no wallet needed). Resolves to null if it does not exist. */
 export async function getProject(projectId) {
   const contract = await getReadContract();
-  const project = await contract.getProject(projectId);
-  return formatProjectResponse(project);
+  try {
+    return formatProjectResponse(await contract.getProject(projectId));
+  } catch (err) {
+    if (err?.revert?.name === 'ProjectNotFound') return null;
+    throw Object.assign(new Error('The Monad network could not be reached to read this project.'), { code: 'RPC_FAILED', cause: err });
+  }
+}
+
+export async function getProjectCount() {
+  const contract = await getReadContract();
+  return Number(await contract.projectCount());
 }
 
 export async function createProject(developer, deadline, detailsHash, escrowAmount) {
-  const contract = await getContract();
-  
+  const contract = await getReadContract();
+
   // Validate inputs
   if (!ethers.isAddress(developer)) {
     throw new Error('Invalid developer address');
@@ -74,17 +121,8 @@ export async function createProject(developer, deadline, detailsHash, escrowAmou
   const deadlineNum = BigInt(Math.floor(deadline));
   const amountBN = BigInt(escrowAmount);
   
-  // Call contract
-  const tx = await contract.createProject(
-    developer,
-    deadlineNum,
-    detailsHash,
-    { value: amountBN }
-  );
+  const { receipt } = await send('createProject', developer, deadlineNum, detailsHash, { value: amountBN });
 
-  // Wait for confirmation
-  const receipt = await tx.wait();
-  
   // Extract project ID from ProjectCreated event
   let projectId = null;
   for (const log of receipt.logs) {
@@ -105,79 +143,57 @@ export async function createProject(developer, deadline, detailsHash, escrowAmou
 }
 
 export async function submitWebsite(projectId, websiteURL) {
-  const contract = await getContract();
-  
   if (!websiteURL || websiteURL.trim().length === 0) {
     throw new Error('Website URL is required');
   }
   
-  const tx = await contract.submitWebsite(projectId, websiteURL);
-  const receipt = await tx.wait();
-  
-  return {
-    txHash: receipt.hash,
-    blockNumber: receipt.blockNumber,
-  };
+  const { txHash, blockNumber } = await send('submitWebsite', projectId, websiteURL);
+  return { txHash, blockNumber };
 }
 
 export async function approveProject(projectId) {
-  const contract = await getContract();
-  const tx = await contract.approveProject(projectId);
-  const receipt = await tx.wait();
-  
-  return {
-    txHash: receipt.hash,
-    blockNumber: receipt.blockNumber,
-  };
+  const { txHash, blockNumber } = await send('approveProject', projectId);
+  return { txHash, blockNumber };
 }
 
 export async function disputeProject(projectId) {
-  const contract = await getContract();
-  const tx = await contract.disputeProject(projectId);
-  const receipt = await tx.wait();
-  
-  return {
-    txHash: receipt.hash,
-    blockNumber: receipt.blockNumber,
-  };
+  const { txHash, blockNumber } = await send('disputeProject', projectId);
+  return { txHash, blockNumber };
 }
 
 export async function requestExtension(projectId, requestedDeadline) {
-  const contract = await getContract();
-  const tx = await contract.requestExtension(projectId, BigInt(Math.floor(requestedDeadline)));
-  const receipt = await tx.wait();
-  
-  return {
-    txHash: receipt.hash,
-    blockNumber: receipt.blockNumber,
-  };
+  const { txHash, blockNumber } = await send('requestExtension', projectId, BigInt(Math.floor(requestedDeadline)));
+  return { txHash, blockNumber };
 }
 
 export async function respondToExtension(projectId, approve) {
-  const contract = await getContract();
-  const tx = await contract.respondToExtension(projectId, approve);
-  const receipt = await tx.wait();
-  
-  return {
-    txHash: receipt.hash,
-    blockNumber: receipt.blockNumber,
-  };
+  const { txHash, blockNumber } = await send('respondToExtension', projectId, approve);
+  return { txHash, blockNumber };
 }
 
 export async function withdrawTo(recipient) {
-  const contract = await getContract();
-  
   if (!ethers.isAddress(recipient)) {
     throw new Error('Invalid recipient address');
   }
   
-  const tx = await contract.withdrawTo(recipient);
-  const receipt = await tx.wait();
-  
-  return {
-    txHash: receipt.hash,
-    blockNumber: receipt.blockNumber,
-  };
+  const { txHash, blockNumber } = await send('withdrawTo', recipient);
+  return { txHash, blockNumber };
+}
+
+export async function refundAfterDeadline(projectId) {
+  const { txHash, blockNumber } = await send('refundAfterDeadline', projectId);
+  return { txHash, blockNumber };
+}
+
+export async function releaseAfterReview(projectId) {
+  const { txHash, blockNumber } = await send('releaseAfterReview', projectId);
+  return { txHash, blockNumber };
+}
+
+/** Native MON (in wei, as a bigint) this address can withdraw. */
+export async function getClaimable(address) {
+  const contract = await getReadContract();
+  return contract.claimable(address);
 }
 
 export function getProjectStateName(stateNum) {

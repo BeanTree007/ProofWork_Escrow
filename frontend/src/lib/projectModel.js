@@ -8,6 +8,7 @@ export const STATUS = {
   DISPUTED: "Disputed",
   EXPIRED: "Expired",
   REFUNDED: "Refunded",
+  AUTO_RELEASED: "Auto-released",
   EXTENSION_REQUESTED: "Extension Requested",
 };
 
@@ -34,6 +35,7 @@ export function roleFor(project, address) {
 export function statusTone(status) {
   switch (status) {
     case STATUS.APPROVED:
+    case STATUS.AUTO_RELEASED:
     case STATUS.FUNDED:
       return "ok";
     case STATUS.SUBMITTED:
