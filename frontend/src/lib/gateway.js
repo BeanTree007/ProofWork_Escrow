@@ -173,7 +173,7 @@ export async function getProject(id) {
   // Demo mode or test wallet fallback
   const p = load().find((x) => x.id === id);
   return p ? publicView(p) : null;
-}
+}// Addding comment fpr pushing
 
 export async function getBrief(id, address) {
   const p = load().find((x) => x.id === id);
@@ -181,7 +181,7 @@ export async function getBrief(id, address) {
   if (roleFor(p, address) === "other") throw fail("FORBIDDEN", "This wallet is not part of the project.");
   const brief = { description: p.description, pages: p.pages, features: p.features };
   return { ...brief, hashMatches: (await computeBriefHash(brief)) === p.briefHash };
-}
+  }
 
 export async function approveProject(id, address) {
   const testWallet = localStorage.getItem("proofwork.testWallet");
