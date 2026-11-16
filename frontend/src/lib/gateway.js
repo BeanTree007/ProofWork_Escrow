@@ -75,7 +75,7 @@ export async function createProject(input, clientAddress) {
         amountWei
       );
 
-      return {
+      const project = {
         id: result.projectId,
         name: input.name.trim(),
         description: input.description.trim(),
@@ -93,6 +93,11 @@ export async function createProject(input, clientAddress) {
         acceptedAt: null,
         extensions: [],
       };
+      
+      // Save to localStorage so Dashboard can find it
+      save([project, ...load()]);
+      
+      return project;
     } catch (err) {
       console.error("Blockchain create failed, falling back to demo:", err);
       // Fall through to demo mode
