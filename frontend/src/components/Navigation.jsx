@@ -34,9 +34,6 @@ export default function Navigation() {
             </NavLink>
           ))}
         </nav>
-        <span className="mode-pill" title="Projects are stored in this browser until the contract is connected">
-          Demo mode
-        </span>
         <WalletButton />
       </div>
     </header>

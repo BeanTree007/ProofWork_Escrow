@@ -111,6 +111,13 @@ if (typeof window !== 'undefined' && window.ethereum) {
       currentAccount = accounts[0];
       signer = null; // Will be recreated on next use
     }
+    // Notify React hook of account change
+    try {
+      const { notifyWalletChanged } = require('./useBlockchainWallet');
+      notifyWalletChanged(currentAccount);
+    } catch {
+      // Hook may not be loaded yet
+    }
   });
 
   window.ethereum.on('chainChanged', () => {
