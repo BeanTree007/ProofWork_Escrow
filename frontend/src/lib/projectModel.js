@@ -37,12 +37,13 @@ export function statusTone(status) {
     case STATUS.FUNDED:
       return "ok";
     case STATUS.SUBMITTED:
-      return "info";
+    case STATUS.IN_PROGRESS:
+      return "accent";
     case STATUS.DISPUTED:
     case STATUS.REFUNDED:
-      return "error";
+      return "bad";
     default:
-      return "neutral";
+      return "muted";
   }
 }
 
